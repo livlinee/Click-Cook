@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "992268657100",
+    "project_id": "clickncook-43a81",
+    "storage_bucket": "clickncook-43a81.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:992268657100:android:416d3faf6d7192c2a8fd69",
+        "android_client_info": {
+          "package_name": "com.example.clickncook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9PMd3RS1x4CcCADrfU5f_KbI5mYYL_p8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
