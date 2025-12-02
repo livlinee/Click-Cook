@@ -16,7 +16,6 @@ import com.example.clickncook.controllers.user.DetailRecipeActivity;
 import com.example.clickncook.models.Report;
 import com.example.clickncook.views.adapter.ReportAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,11 +33,10 @@ public class AdminReportsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_admin_reports, container, false);
+        View view = inflater.inflate(R.layout.activity_admin_reports, container, false);
 
         db = FirebaseFirestore.getInstance();
-        TabLayout tabLayout = view.findViewById(R.id.tab_layout_admin);
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_reports);
+        RecyclerView recyclerView = view.findViewById(R.id.rvReports);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         reportList = new ArrayList<>();
@@ -46,7 +44,6 @@ public class AdminReportsFragment extends Fragment {
             @Override
             public void onClick(Report report) {
                 if ("recipe".equals(report.getContentType())) {
-                    Intent intent = new Intent(getContext(), DetailRecipeActivity.class);
                     Toast.makeText(getContext(), "ID Konten: " + report.getReportedContentId(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -58,14 +55,14 @@ public class AdminReportsFragment extends Fragment {
         });
         recyclerView.setAdapter(adapter);
 
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                currentStatus = tab.getPosition() == 0 ? "Pending" : "Resolved";
-                loadReports();
-            }
-            @Override public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        view.findViewById(R.id.tabPending).setOnClickListener(v -> {
+            currentStatus = "Pending";
+            loadReports();
+        });
+
+        view.findViewById(R.id.tabResolved).setOnClickListener(v -> {
+            currentStatus = "Resolved";
+            loadReports();
         });
 
         loadReports();
@@ -89,14 +86,14 @@ public class AdminReportsFragment extends Fragment {
 
     private void showActionDialog(Report report) {
         BottomSheetDialog dialog = new BottomSheetDialog(getContext());
-        dialog.setContentView(R.layout.dialog_admin_action);
+        dialog.setContentView(R.layout.dialog_report_action);
 
-        dialog.findViewById(R.id.btn_hapus_konten).setOnClickListener(v -> {
+        dialog.findViewById(R.id.btnDelete).setOnClickListener(v -> {
             resolveReport(report, "Resolved_Deleted", true);
             dialog.dismiss();
         });
 
-        dialog.findViewById(R.id.btn_tolak_laporan).setOnClickListener(v -> {
+        dialog.findViewById(R.id.btnReject).setOnClickListener(v -> {
             resolveReport(report, "Rejected", false);
             dialog.dismiss();
         });

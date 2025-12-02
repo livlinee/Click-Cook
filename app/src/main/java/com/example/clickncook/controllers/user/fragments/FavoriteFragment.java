@@ -26,14 +26,17 @@ public class FavoriteFragment extends Fragment {
     private FirebaseFirestore db;
     private RecipeAdapter adapter;
     private List<Recipe> favoriteList;
+    private View emptyState;
+    private RecyclerView recyclerView;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_favorite, container, false);
+        View view = inflater.inflate(R.layout.activity_favorite, container, false);
 
         db = FirebaseFirestore.getInstance();
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_favorites);
+        recyclerView = view.findViewById(R.id.rvFavoriteGrid);
+        emptyState = view.findViewById(R.id.layoutEmptyState);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         favoriteList = new ArrayList<>();
@@ -71,11 +74,23 @@ public class FavoriteFragment extends Fragment {
                                         favoriteList.add(r);
                                     }
                                     adapter.notifyDataSetChanged();
+                                    updateUI();
                                 });
                     } else {
                         favoriteList.clear();
                         adapter.notifyDataSetChanged();
+                        updateUI();
                     }
                 });
+    }
+
+    private void updateUI() {
+        if (favoriteList.isEmpty()) {
+            emptyState.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            emptyState.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
 }

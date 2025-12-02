@@ -2,8 +2,12 @@ package com.example.clickncook.controllers.user;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,11 +19,12 @@ import com.example.clickncook.R;
 import com.example.clickncook.controllers.auth.LoginActivity;
 import com.example.clickncook.models.Bookmark;
 import com.example.clickncook.models.Recipe;
+import com.example.clickncook.models.Report;
 import com.example.clickncook.models.Review;
 import com.example.clickncook.views.adapter.IngredientAdapter;
 import com.example.clickncook.views.adapter.ReviewAdapter;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -29,54 +34,63 @@ import java.util.List;
 public class DetailRecipeActivity extends AppCompatActivity {
 
     private Recipe recipe;
-    private RecyclerView recyclerView;
-    private ImageView btnFavorite;
+    private ImageButton btnFavorite;
     private boolean isFavorited = false;
     private String bookmarkId = null;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private RecyclerView rvIngredients, rvSteps, rvReviews;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail_recipe);
+        setContentView(R.layout.activity_recipe_detail);
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
         recipe = (Recipe) getIntent().getSerializableExtra("RECIPE_DATA");
 
-        // Binding Views
-        ImageView imgCover = findViewById(R.id.img_cover);
-        TextView tvTitle = findViewById(R.id.tv_title);
-        TextView tvAuthor = findViewById(R.id.tv_author);
-        TextView tvRating = findViewById(R.id.tv_rating_summary);
-        RatingBar ratingBar = findViewById(R.id.rating_bar_display);
-        btnFavorite = findViewById(R.id.btn_favorite_heart);
+        ImageView imgCover = findViewById(R.id.recipe_image);
+        TextView tvTitle = findViewById(R.id.recipe_title);
+        TextView tvTime = findViewById(R.id.recipe_duration);
+        RatingBar ratingBar = findViewById(R.id.rating_bar);
+        btnFavorite = findViewById(R.id.btn_favorite_inline);
+        ImageButton btnBack = findViewById(R.id.btn_back);
+        ImageButton btnReport = findViewById(R.id.btn_warning_header);
+
+        rvIngredients = findViewById(R.id.rvIngredients);
+        rvSteps = findViewById(R.id.rvSteps);
+        rvReviews = findViewById(R.id.rvReviews);
+
+        rvIngredients.setLayoutManager(new LinearLayoutManager(this));
+        rvSteps.setLayoutManager(new LinearLayoutManager(this));
+        rvReviews.setLayoutManager(new LinearLayoutManager(this));
 
         if (recipe != null) {
             tvTitle.setText(recipe.getTitle());
-            tvAuthor.setText("Oleh: " + recipe.getUserName());
-            tvRating.setText(String.format("%.1f", recipe.getAverageRating()));
-            ratingBar.setRating((float) recipe.getAverageRating());
+            tvTime.setText(recipe.getCookTime());
+            if (recipe.getAverageRating() > 0) {
+                ratingBar.setRating((float) recipe.getAverageRating());
+            }
             Glide.with(this).load(recipe.getImageUrl()).into(imgCover);
 
             if (mAuth.getCurrentUser() != null) checkFavoriteStatus();
         }
 
-        recyclerView = findViewById(R.id.recycler_content);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setNestedScrollingEnabled(false);
-
-        findViewById(R.id.btn_ingredients).setOnClickListener(v -> showIngredients());
-        findViewById(R.id.btn_steps).setOnClickListener(v -> showSteps());
-        findViewById(R.id.btn_reviews).setOnClickListener(v -> showReviews());
+        findViewById(R.id.btn_bahan).setOnClickListener(v -> showTab("ingredients"));
+        findViewById(R.id.btn_cara_masak).setOnClickListener(v -> showTab("steps"));
+        findViewById(R.id.btn_lihat_ulasan).setOnClickListener(v -> showTab("reviews"));
 
         showIngredients();
+        showSteps();
+        showReviews();
+        showTab("ingredients");
 
         btnFavorite.setOnClickListener(v -> toggleFavorite());
+        btnBack.setOnClickListener(v -> finish());
 
-        findViewById(R.id.btn_write_review).setOnClickListener(v -> {
+        findViewById(R.id.btn_tulis_ulasan).setOnClickListener(v -> {
             if (checkGuest()) return;
             Intent intent = new Intent(this, WriteReviewActivity.class);
             intent.putExtra("RECIPE_ID", recipe.getId());
@@ -85,18 +99,84 @@ public class DetailRecipeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        findViewById(R.id.btn_report_exclamation).setOnClickListener(v -> {
+        btnReport.setOnClickListener(v -> {
             if (checkGuest()) return;
-            Toast.makeText(this, "Fitur Lapor akan segera hadir", Toast.LENGTH_SHORT).show();
+            showReportDialog();
         });
     }
 
+    private void showReportDialog() {
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_report_user, null);
+        dialog.setContentView(view);
+
+        RadioGroup rgReasons = view.findViewById(R.id.rgReportReasons);
+        EditText etDetail = view.findViewById(R.id.etDetail);
+
+        rgReasons.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbOther) {
+                etDetail.setVisibility(View.VISIBLE);
+            } else {
+                etDetail.setVisibility(View.GONE);
+            }
+        });
+
+        view.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
+
+        view.findViewById(R.id.btnSubmitReport).setOnClickListener(v -> {
+            int selectedId = rgReasons.getCheckedRadioButtonId();
+            if (selectedId == -1) {
+                Toast.makeText(this, "Pilih alasan laporan", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            RadioButton selectedRb = view.findViewById(selectedId);
+            String reason = selectedRb.getText().toString();
+            String detail = etDetail.getText().toString();
+
+            Report report = new Report();
+            report.setReporterUserId(mAuth.getCurrentUser().getUid());
+            report.setReportedContentId(recipe.getId());
+            report.setContentType("recipe");
+            report.setReason(reason);
+            report.setDetail(detail);
+            report.setStatus("Pending");
+
+            db.collection("reports").add(report).addOnSuccessListener(doc -> {
+                Toast.makeText(this, "Laporan terkirim", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void showTab(String tab) {
+        rvIngredients.setVisibility(View.GONE);
+        rvSteps.setVisibility(View.GONE);
+        rvReviews.setVisibility(View.GONE);
+        findViewById(R.id.tvIngredientsHeader).setVisibility(View.GONE);
+        findViewById(R.id.tvStepsHeader).setVisibility(View.GONE);
+        findViewById(R.id.tvReviewsHeader).setVisibility(View.GONE);
+
+        if (tab.equals("ingredients")) {
+            rvIngredients.setVisibility(View.VISIBLE);
+            findViewById(R.id.tvIngredientsHeader).setVisibility(View.VISIBLE);
+        } else if (tab.equals("steps")) {
+            rvSteps.setVisibility(View.VISIBLE);
+            findViewById(R.id.tvStepsHeader).setVisibility(View.VISIBLE);
+        } else if (tab.equals("reviews")) {
+            rvReviews.setVisibility(View.VISIBLE);
+            findViewById(R.id.tvReviewsHeader).setVisibility(View.VISIBLE);
+        }
+    }
+
     private void showIngredients() {
-        recyclerView.setAdapter(new IngredientAdapter(this, recipe.getIngredients(), false));
+        rvIngredients.setAdapter(new IngredientAdapter(this, recipe.getIngredients(), false));
     }
 
     private void showSteps() {
-        recyclerView.setAdapter(new IngredientAdapter(this, recipe.getSteps(), true));
+        rvSteps.setAdapter(new IngredientAdapter(this, recipe.getSteps(), true));
     }
 
     private void showReviews() {
@@ -109,11 +189,7 @@ public class DetailRecipeActivity extends AppCompatActivity {
             for (DocumentSnapshot doc : snapshots) {
                 reviews.add(doc.toObject(Review.class));
             }
-            recyclerView.setAdapter(new ReviewAdapter(this, reviews));
-
-            if (reviews.isEmpty()) {
-                Toast.makeText(this, "Belum ada ulasan.", Toast.LENGTH_SHORT).show();
-            }
+            rvReviews.setAdapter(new ReviewAdapter(this, reviews));
         });
     }
 
@@ -130,7 +206,7 @@ public class DetailRecipeActivity extends AppCompatActivity {
                         btnFavorite.setImageResource(R.drawable.ic_heart_filled);
                     } else {
                         isFavorited = false;
-                        btnFavorite.setImageResource(R.drawable.ic_heart_outline);
+                        btnFavorite.setImageResource(R.drawable.ic_nav_favorite);
                     }
                 });
     }
@@ -145,7 +221,7 @@ public class DetailRecipeActivity extends AppCompatActivity {
                 db.collection("bookmarks").document(bookmarkId).delete()
                         .addOnSuccessListener(aVoid -> {
                             isFavorited = false;
-                            btnFavorite.setImageResource(R.drawable.ic_heart_outline);
+                            btnFavorite.setImageResource(R.drawable.ic_nav_favorite);
                             Toast.makeText(this, "Dihapus dari Favorit", Toast.LENGTH_SHORT).show();
                         });
             }

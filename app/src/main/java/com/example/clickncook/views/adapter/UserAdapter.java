@@ -34,31 +34,38 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_user_admin, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_admin_user_card, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = userList.get(position);
+
         holder.tvName.setText(user.getName());
         holder.tvEmail.setText(user.getEmail());
 
         if (user.getPhotoUrl() != null) {
-            Glide.with(context).load(user.getPhotoUrl()).circleCrop().into(holder.imgAvatar);
+            Glide.with(context)
+                    .load(user.getPhotoUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_person_placeholder)
+                    .into(holder.imgAvatar);
         }
 
         if (user.isBlocked()) {
-            holder.tvBlocked.setVisibility(View.VISIBLE);
-            holder.btnBlock.setText("Buka Blokir");
-            holder.btnBlock.setTextColor(Color.BLACK);
+            holder.tvStatus.setText("Diblokir");
+            holder.tvStatus.setBackgroundResource(R.drawable.bg_status_gray);
+            holder.btnAction.setText("Buka Blokir");
+            holder.btnAction.setTextColor(Color.BLACK);
         } else {
-            holder.tvBlocked.setVisibility(View.GONE);
-            holder.btnBlock.setText("Blokir");
-            holder.btnBlock.setTextColor(Color.RED);
+            holder.tvStatus.setText("Aktif");
+            holder.tvStatus.setBackgroundResource(R.drawable.bg_status_green);
+            holder.btnAction.setText("Blokir");
+            holder.btnAction.setTextColor(context.getResources().getColor(R.color.primary_orange));
         }
 
-        holder.btnBlock.setOnClickListener(v -> listener.onBlockClick(user));
+        holder.btnAction.setOnClickListener(v -> listener.onBlockClick(user));
     }
 
     @Override
@@ -66,16 +73,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imgAvatar;
-        TextView tvName, tvEmail, tvBlocked;
-        Button btnBlock;
+        TextView tvName, tvEmail, tvStatus;
+        Button btnAction;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            imgAvatar = itemView.findViewById(R.id.img_user_avatar);
-            tvName = itemView.findViewById(R.id.tv_user_name);
-            tvEmail = itemView.findViewById(R.id.tv_user_email);
-            tvBlocked = itemView.findViewById(R.id.tv_status_blocked);
-            btnBlock = itemView.findViewById(R.id.btn_toggle_block);
+            imgAvatar = itemView.findViewById(R.id.imgUserAvatar);
+            tvName = itemView.findViewById(R.id.tvUserName);
+            tvEmail = itemView.findViewById(R.id.tvUserEmail);
+            tvStatus = itemView.findViewById(R.id.tvStatusTag);
+            btnAction = itemView.findViewById(R.id.btnAction);
         }
     }
 }

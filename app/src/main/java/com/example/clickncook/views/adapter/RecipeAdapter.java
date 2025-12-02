@@ -13,11 +13,14 @@ import com.example.clickncook.R;
 import com.example.clickncook.models.Recipe;
 import java.util.List;
 
-public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder> {
+public class RecipeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
     private List<Recipe> recipeList;
     private OnItemClickListener listener;
+
+    private static final int TYPE_NORMAL = 0;
+    private static final int TYPE_DRAFT = 1;
 
     public interface OnItemClickListener {
         void onItemClick(Recipe recipe);
@@ -29,44 +32,79 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         this.listener = listener;
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        return recipeList.get(position).isDraft() ? TYPE_DRAFT : TYPE_NORMAL;
+    }
+
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_recipe_card, parent, false);
-        return new ViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_DRAFT) {
+            View view = LayoutInflater.from(context).inflate(R.layout.item_draft_recipe, parent, false);
+            return new DraftViewHolder(view);
+        } else {
+            View view = LayoutInflater.from(context).inflate(R.layout.item_recipe_card_vertical, parent, false);
+            return new NormalViewHolder(view);
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Recipe recipe = recipeList.get(position);
 
-        holder.tvTitle.setText(recipe.getTitle());
-        holder.tvTime.setText(recipe.getCookTime());
-        holder.tvRating.setText(String.format("%.1f ★", recipe.getAverageRating()));
+        if (getItemViewType(position) == TYPE_DRAFT) {
+            DraftViewHolder draftHolder = (DraftViewHolder) holder;
+            draftHolder.tvTitle.setText(recipe.getTitle());
+            draftHolder.tvStatus.setText("Draf belum diterbitkan");
 
-        if (recipe.getImageUrl() != null) {
-            Glide.with(context)
-                    .load(recipe.getImageUrl())
-                    .centerCrop()
-                    .into(holder.imgThumbnail);
+            if (recipe.getImageUrl() != null) {
+                Glide.with(context).load(recipe.getImageUrl()).centerCrop().into(draftHolder.imgThumb);
+            }
+
+            draftHolder.itemView.setOnClickListener(v -> listener.onItemClick(recipe));
+
+        } else {
+            NormalViewHolder normalHolder = (NormalViewHolder) holder;
+            normalHolder.tvTitle.setText(recipe.getTitle());
+            normalHolder.tvScore.setText(String.format("%.1f", recipe.getAverageRating()));
+            normalHolder.tvReviewCount.setText("(" + recipe.getTotalReviews() + " Ulasan)");
+            normalHolder.tvAuthor.setText(recipe.getUserName());
+
+            if (recipe.getImageUrl() != null) {
+                Glide.with(context).load(recipe.getImageUrl()).centerCrop().into(normalHolder.imgThumb);
+            }
+
+            normalHolder.itemView.setOnClickListener(v -> listener.onItemClick(recipe));
         }
-
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(recipe));
     }
 
     @Override
     public int getItemCount() { return recipeList.size(); }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgThumbnail;
-        TextView tvTitle, tvRating, tvTime;
+    public static class NormalViewHolder extends RecyclerView.ViewHolder {
+        ImageView imgThumb;
+        TextView tvTitle, tvScore, tvReviewCount, tvAuthor;
 
-        public ViewHolder(@NonNull View itemView) {
+        public NormalViewHolder(@NonNull View itemView) {
             super(itemView);
-            imgThumbnail = itemView.findViewById(R.id.img_recipe_thumbnail);
-            tvTitle = itemView.findViewById(R.id.tv_recipe_title);
-            tvRating = itemView.findViewById(R.id.tv_rating);
-            tvTime = itemView.findViewById(R.id.tv_time);
+            imgThumb = itemView.findViewById(R.id.imgRecipeThumb);
+            tvTitle = itemView.findViewById(R.id.tvRecipeTitle);
+            tvScore = itemView.findViewById(R.id.tvScore);
+            tvReviewCount = itemView.findViewById(R.id.tvReviewCount);
+            tvAuthor = itemView.findViewById(R.id.tvAuthorName);
+        }
+    }
+
+    public static class DraftViewHolder extends RecyclerView.ViewHolder {
+        ImageView imgThumb;
+        TextView tvTitle, tvStatus;
+
+        public DraftViewHolder(@NonNull View itemView) {
+            super(itemView);
+            imgThumb = itemView.findViewById(R.id.imgRecipeThumb);
+            tvTitle = itemView.findViewById(R.id.tvRecipeTitle);
+            tvStatus = itemView.findViewById(R.id.tvRecipeStatus);
         }
     }
 }

@@ -2,9 +2,8 @@ package com.example.clickncook.controllers.user;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.example.clickncook.R;
@@ -13,7 +12,6 @@ import com.example.clickncook.controllers.user.fragments.FavoriteFragment;
 import com.example.clickncook.controllers.user.fragments.HomeFragment;
 import com.example.clickncook.controllers.user.fragments.ProfileFragment;
 import com.example.clickncook.controllers.user.fragments.ReviewHistoryFragment;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -24,33 +22,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_home);
 
         mAuth = FirebaseAuth.getInstance();
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
-        FloatingActionButton fabAdd = findViewById(R.id.fab_add);
+
+        LinearLayout navHome = findViewById(R.id.navRecipe);
+        LinearLayout navFavorite = findViewById(R.id.navFavorite);
+        LinearLayout navReview = findViewById(R.id.navReview);
+        LinearLayout navProfile = findViewById(R.id.navProfile);
+        FloatingActionButton fabAdd = findViewById(R.id.fabAdd);
 
         loadFragment(new HomeFragment());
 
-        bottomNav.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.nav_home) {
-                loadFragment(new HomeFragment());
-                return true;
-            } else if (id == R.id.nav_favorite) {
-                if (checkGuest()) return false;
-                loadFragment(new FavoriteFragment());
-                return true;
-            } else if (id == R.id.nav_reviews) {
-                if (checkGuest()) return false;
-                loadFragment(new ReviewHistoryFragment());
-                return true;
-            } else if (id == R.id.nav_profile) {
-                if (checkGuest()) return false;
-                loadFragment(new ProfileFragment());
-                return true;
-            }
-            return false;
+        navHome.setOnClickListener(v -> loadFragment(new HomeFragment()));
+
+        navFavorite.setOnClickListener(v -> {
+            if (!checkGuest()) loadFragment(new FavoriteFragment());
+        });
+
+        navReview.setOnClickListener(v -> {
+            if (!checkGuest()) loadFragment(new ReviewHistoryFragment());
+        });
+
+        navProfile.setOnClickListener(v -> {
+            if (!checkGuest()) loadFragment(new ProfileFragment());
         });
 
         fabAdd.setOnClickListener(v -> {

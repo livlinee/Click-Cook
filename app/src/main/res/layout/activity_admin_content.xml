@@ -45,6 +45,7 @@
             app:cardElevation="2dp">
 
             <EditText
+                android:id="@+id/etSearchContent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@android:color/white"
@@ -65,7 +66,6 @@
             android:spinnerMode="dropdown" />
     </LinearLayout>
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvContentList"
         android:layout_width="match_parent"
@@ -78,6 +78,7 @@
         app:layout_constraintTop_toBottomOf="@+id/searchSortBar"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/item_admin_recipe_content" />
+
     <LinearLayout
         android:id="@+id/adminBottomNavContainer"
         android:layout_width="match_parent"
@@ -87,87 +88,6 @@
         android:paddingVertical="8dp"
         android:weightSum="4"
         app:layout_constraintBottom_toBottomOf="parent">
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_home_admin"
-                app:tint="@color/gray_text"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Beranda"
-                android:textSize="12sp"
-                android:textColor="@color/gray_text"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_report"
-                app:tint="@color/gray_text"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Laporan"
-                android:textSize="12sp"
-                android:textColor="@color/gray_text"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_content"
-                app:tint="@color/primary_orange"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Konten"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textColor="@color/primary_orange"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_person_placeholder"
-                app:tint="@color/gray_text"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pengguna"
-                android:textSize="12sp"
-                android:textColor="@color/gray_text"/>
-        </LinearLayout>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -26,10 +26,10 @@ public class AdminUsersFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_admin_users, container, false);
+        View view = inflater.inflate(R.layout.activity_admin_users, container, false);
 
         db = FirebaseFirestore.getInstance();
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_admin_users);
+        RecyclerView recyclerView = view.findViewById(R.id.rvUserList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         userList = new ArrayList<>();

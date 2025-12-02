@@ -14,30 +14,37 @@ public class IngredientAdapter extends RecyclerView.Adapter<IngredientAdapter.Vi
 
     private Context context;
     private List<String> listData;
-    private boolean isOrdered;
+    private boolean isStep;
 
-    public IngredientAdapter(Context context, List<String> listData, boolean isOrdered) {
+    public IngredientAdapter(Context context, List<String> listData, boolean isStep) {
         this.context = context;
         this.listData = listData;
-        this.isOrdered = isOrdered;
+        this.isStep = isStep;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_ingredient, parent, false);
-        return new ViewHolder(view);
+        if (isStep) {
+            View view = LayoutInflater.from(context).inflate(R.layout.item_step_card, parent, false);
+            return new ViewHolder(view, true);
+        } else {
+            View view = LayoutInflater.from(context).inflate(R.layout.item_ingredient_list, parent, false);
+            return new ViewHolder(view, false);
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String text = listData.get(position);
-        holder.tvContent.setText(text);
+        String data = listData.get(position);
 
-        if (isOrdered) {
-            holder.tvBullet.setText((position + 1) + ".");
+        if (isStep) {
+            holder.tvStepNumber.setText(String.valueOf(position + 1));
+            holder.tvStepInstruction.setText(data);
+            holder.tvStepTime.setText("Estimasi: 5 min");
         } else {
-            holder.tvBullet.setText("•");
+            holder.tvIngredientName.setText(data);
+            holder.tvIngredientAmount.setText("");
         }
     }
 
@@ -45,11 +52,19 @@ public class IngredientAdapter extends RecyclerView.Adapter<IngredientAdapter.Vi
     public int getItemCount() { return listData.size(); }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvBullet, tvContent;
-        public ViewHolder(@NonNull View itemView) {
+        TextView tvStepNumber, tvStepInstruction, tvStepTime;
+        TextView tvIngredientName, tvIngredientAmount;
+
+        public ViewHolder(@NonNull View itemView, boolean isStepLayout) {
             super(itemView);
-            tvBullet = itemView.findViewById(R.id.tv_bullet);
-            tvContent = itemView.findViewById(R.id.tv_content);
+            if (isStepLayout) {
+                tvStepNumber = itemView.findViewById(R.id.tvStepNumber);
+                tvStepInstruction = itemView.findViewById(R.id.tvStepInstruction);
+                tvStepTime = itemView.findViewById(R.id.tvStepTime);
+            } else {
+                tvIngredientName = itemView.findViewById(R.id.tvIngredientName);
+                tvIngredientAmount = itemView.findViewById(R.id.tvIngredientAmount);
+            }
         }
     }
 }

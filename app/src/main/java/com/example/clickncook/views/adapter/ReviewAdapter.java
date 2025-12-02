@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,7 +27,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_review, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_review_comment, parent, false);
         return new ViewHolder(view);
     }
 
@@ -36,13 +37,15 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
         holder.tvUserName.setText(review.getUserName());
         holder.tvComment.setText(review.getComment());
-        holder.tvRating.setText("Rating: " + review.getRating());
+        holder.ratingBar.setRating((float) review.getRating());
+
+        holder.tvTime.setText("Baru saja");
 
         if (review.getUserPhotoUrl() != null) {
             Glide.with(context)
                     .load(review.getUserPhotoUrl())
                     .circleCrop()
-                    .placeholder(android.R.drawable.sym_def_app_icon)
+                    .placeholder(R.drawable.ic_person_placeholder)
                     .into(holder.imgAvatar);
         }
     }
@@ -52,14 +55,16 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imgAvatar;
-        TextView tvUserName, tvRating, tvComment;
+        TextView tvUserName, tvTime, tvComment;
+        RatingBar ratingBar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            imgAvatar = itemView.findViewById(R.id.img_user_avatar);
-            tvUserName = itemView.findViewById(R.id.tv_user_name);
-            tvRating = itemView.findViewById(R.id.tv_review_rating);
-            tvComment = itemView.findViewById(R.id.tv_review_comment);
+            imgAvatar = itemView.findViewById(R.id.imgUserAvatar);
+            tvUserName = itemView.findViewById(R.id.tvUserName);
+            tvTime = itemView.findViewById(R.id.tvTime);
+            ratingBar = itemView.findViewById(R.id.rbReviewStars);
+            tvComment = itemView.findViewById(R.id.tvCommentContent);
         }
     }
 }

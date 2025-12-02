@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -33,18 +32,25 @@ public class AdminRecipeAdapter extends RecyclerView.Adapter<AdminRecipeAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_recipe_admin, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_admin_recipe_content, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Recipe recipe = recipeList.get(position);
+
         holder.tvTitle.setText(recipe.getTitle());
         holder.tvAuthor.setText("Oleh: " + recipe.getUserName());
 
+        holder.tvDate.setText("Diposting: Baru saja");
+
         if (recipe.getImageUrl() != null) {
-            Glide.with(context).load(recipe.getImageUrl()).centerCrop().into(holder.imgThumb);
+            Glide.with(context)
+                    .load(recipe.getImageUrl())
+                    .centerCrop()
+                    .placeholder(R.drawable.logo)
+                    .into(holder.imgThumb);
         }
 
         holder.btnDelete.setOnClickListener(v -> listener.onDeleteClick(recipe));
@@ -55,15 +61,16 @@ public class AdminRecipeAdapter extends RecyclerView.Adapter<AdminRecipeAdapter.
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imgThumb;
-        TextView tvTitle, tvAuthor;
-        ImageButton btnDelete;
+        TextView tvTitle, tvAuthor, tvDate;
+        View btnDelete;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            imgThumb = itemView.findViewById(R.id.img_thumb);
-            tvTitle = itemView.findViewById(R.id.tv_title);
-            tvAuthor = itemView.findViewById(R.id.tv_author);
-            btnDelete = itemView.findViewById(R.id.btn_delete);
+            imgThumb = itemView.findViewById(R.id.imgRecipeThumb);
+            tvTitle = itemView.findViewById(R.id.tvRecipeTitle);
+            tvAuthor = itemView.findViewById(R.id.tvRecipeAuthor);
+            tvDate = itemView.findViewById(R.id.tvDate);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
 }

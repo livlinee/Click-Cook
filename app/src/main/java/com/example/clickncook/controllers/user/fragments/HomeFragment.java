@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clickncook.R;
 import com.example.clickncook.controllers.auth.LoginActivity;
 import com.example.clickncook.controllers.user.DetailRecipeActivity;
+import com.example.clickncook.controllers.user.RecipeListActivity;
 import com.example.clickncook.models.Recipe;
 import com.example.clickncook.views.adapter.CategoryAdapter;
 import com.example.clickncook.views.adapter.RecipeAdapter;
@@ -28,67 +29,72 @@ import java.util.List;
 public class HomeFragment extends Fragment {
 
     private FirebaseFirestore db;
-    private RecipeAdapter recipeAdapter;
-    private List<Recipe> recipeList;
     private TextView tvGreeting;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        View view = inflater.inflate(R.layout.activity_home, container, false);
 
         db = FirebaseFirestore.getInstance();
-        tvGreeting = view.findViewById(R.id.tv_greeting);
+        tvGreeting = view.findViewById(R.id.tvWelcome);
 
-        // 1. Setup Header Greeting
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        View btnLogin = view.findViewById(R.id.btnLoginRegister);
         if (user != null) {
             tvGreeting.setText("Halo, " + (user.getDisplayName() != null ? user.getDisplayName() : "Chef") + "!");
+            btnLogin.setVisibility(View.GONE);
         } else {
             tvGreeting.setText("Selamat Datang!");
-            view.findViewById(R.id.btn_login_register).setVisibility(View.VISIBLE); // Tombol Login khusus Guest
-            view.findViewById(R.id.btn_login_register).setOnClickListener(v -> startActivity(new Intent(getContext(), LoginActivity.class)));
+            btnLogin.setVisibility(View.VISIBLE);
+            btnLogin.setOnClickListener(v -> startActivity(new Intent(getContext(), LoginActivity.class)));
         }
+        view.findViewById(R.id.chipAll).setOnClickListener(v -> openListActivity("Semua", "SEMUA RESEP"));
 
-        RecyclerView recyclerCategory = view.findViewById(R.id.recycler_categories);
-        recyclerCategory.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        List<String> categories = Arrays.asList("Semua", "Sarapan", "Dessert", "Minuman", "Dinner");
-        recyclerCategory.setAdapter(new CategoryAdapter(categories, category -> {
-            loadRecipes(category);
-        }));
-
-        // 3. Setup List Resep
-        RecyclerView recyclerRecipe = view.findViewById(R.id.recycler_recipes);
-        recyclerRecipe.setLayoutManager(new LinearLayoutManager(getContext()));
-        recipeList = new ArrayList<>();
-        recipeAdapter = new RecipeAdapter(getContext(), recipeList, recipe -> {
-            Intent intent = new Intent(getContext(), DetailRecipeActivity.class);
-            intent.putExtra("RECIPE_DATA", recipe);
-            startActivity(intent);
-        });
-        recyclerRecipe.setAdapter(recipeAdapter);
-
-        loadRecipes("Semua");
+        setupSection(view, R.id.rvRecommendation, R.id.linkSeeMoreRec, "RECOMMENDATION", "Rekomendasi Pilihan");
+        setupSection(view, R.id.rvNewest, R.id.linkSeeMoreNew, "NEWEST", "Resep Terbaru");
+        setupSection(view, R.id.rvEasy, R.id.linkSeeMoreEasy, "EASY", "Resep Praktis");
+        setupSection(view, R.id.rvLocal, R.id.linkSeeMoreLocal, "LOCAL", "Masakan Nusantara");
 
         return view;
     }
 
-    private void loadRecipes(String category) {
-        Query query = db.collection("recipes")
-                .whereEqualTo("isDraft", false)
-                .orderBy("createdAt", Query.Direction.DESCENDING);
+    private void setupSection(View view, int recyclerId, int linkId, String type, String title) {
+        RecyclerView recyclerView = view.findViewById(recyclerId);
+        TextView tvSeeMore = view.findViewById(linkId);
 
-        if (!category.equals("Semua")) {
-            query = query.whereEqualTo("category", category);
-        }
-
-        query.get().addOnSuccessListener(snapshots -> {
-            recipeList.clear();
-            recipeList.addAll(snapshots.toObjects(Recipe.class));
-            for (int i = 0; i < snapshots.size(); i++) {
-                recipeList.get(i).setId(snapshots.getDocuments().get(i).getId());
-            }
-            recipeAdapter.notifyDataSetChanged();
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        List<Recipe> list = new ArrayList<>();
+        RecipeAdapter adapter = new RecipeAdapter(getContext(), list, recipe -> {
+            Intent intent = new Intent(getContext(), DetailRecipeActivity.class);
+            intent.putExtra("RECIPE_DATA", recipe);
+            startActivity(intent);
         });
+        recyclerView.setAdapter(adapter);
+
+        Query query = db.collection("recipes").whereEqualTo("isDraft", false);
+
+        if (type.equals("RECOMMENDATION")) query = query.orderBy("averageRating", Query.Direction.DESCENDING);
+        else if (type.equals("NEWEST")) query = query.orderBy("createdAt", Query.Direction.DESCENDING);
+        else if (type.equals("EASY")) query = query.whereEqualTo("difficulty", "Mudah");
+        else if (type.equals("LOCAL")) query = query.whereEqualTo("category", "Nusantara");
+
+        query.limit(5).get().addOnSuccessListener(snapshots -> {
+            list.clear();
+            list.addAll(snapshots.toObjects(Recipe.class));
+            for (int i = 0; i < snapshots.size(); i++) {
+                list.get(i).setId(snapshots.getDocuments().get(i).getId());
+            }
+            adapter.notifyDataSetChanged();
+        });
+
+        tvSeeMore.setOnClickListener(v -> openListActivity(type, title));
+    }
+
+    private void openListActivity(String type, String title) {
+        Intent intent = new Intent(getContext(), RecipeListActivity.class);
+        intent.putExtra("LIST_TYPE", type);
+        intent.putExtra("LIST_TITLE", title);
+        startActivity(intent);
     }
 }

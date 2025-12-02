@@ -3,7 +3,6 @@ package com.example.clickncook.controllers.user;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -20,7 +19,6 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -36,20 +34,20 @@ public class AddRecipeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_recipe);
+        setContentView(R.layout.activity_create_recipe);
 
         db = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
 
-        imgPreview = findViewById(R.id.img_recipe_preview);
-        etTitle = findViewById(R.id.et_title);
-        etIngredients = findViewById(R.id.et_ingredients);
-        etSteps = findViewById(R.id.et_steps);
-        spCategory = findViewById(R.id.spinner_category);
-        spTime = findViewById(R.id.spinner_time);
-        spDifficulty = findViewById(R.id.spinner_difficulty);
-        Button btnPublish = findViewById(R.id.btn_publish);
-        Button btnDraft = findViewById(R.id.btn_draft);
+        imgPreview = findViewById(R.id.icCamera);
+        etTitle = findViewById(R.id.etTitle);
+        etIngredients = findViewById(R.id.etIngredient);
+        etSteps = findViewById(R.id.etStep);
+        spCategory = findViewById(R.id.spCategory);
+        spTime = findViewById(R.id.spTime);
+        spDifficulty = findViewById(R.id.spDifficulty);
+        Button btnPublish = findViewById(R.id.btnPublish);
+        Button btnDraft = findViewById(R.id.btnDraft);
 
         ActivityResultLauncher<String> launcher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
@@ -57,6 +55,8 @@ public class AddRecipeActivity extends AppCompatActivity {
                     if (uri != null) {
                         imageUri = uri;
                         imgPreview.setImageURI(uri);
+                        imgPreview.setPadding(0,0,0,0);
+                        imgPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     }
                 });
         imgPreview.setOnClickListener(v -> launcher.launch("image/*"));
@@ -104,7 +104,6 @@ public class AddRecipeActivity extends AppCompatActivity {
 
         db.collection("recipes").add(recipe)
                 .addOnSuccessListener(doc -> {
-                    // Update total resep user
                     db.collection("users").document(user.getUid())
                             .update("totalRecipes", FieldValue.increment(1));
 

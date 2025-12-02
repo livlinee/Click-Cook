@@ -10,7 +10,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="Click n Cook"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ClicknCook"
@@ -28,12 +28,16 @@
         <activity android:name=".controllers.auth.LoginActivity" />
         <activity android:name=".controllers.auth.RegisterActivity" />
         <activity android:name=".controllers.auth.ForgotPasswordActivity" />
+        <activity android:name=".controllers.auth.VerificationActivity" />
+        <activity android:name=".controllers.auth.ResetPasswordActivity" />
 
         <activity android:name=".controllers.user.MainActivity" />
         <activity android:name=".controllers.user.DetailRecipeActivity" />
         <activity android:name=".controllers.user.AddRecipeActivity" />
         <activity android:name=".controllers.user.WriteReviewActivity" />
         <activity android:name=".controllers.user.SettingsActivity" />
+
+        <activity android:name=".controllers.user.RecipeListActivity" />
 
         <activity android:name=".controllers.admin.AdminMainActivity" />
 

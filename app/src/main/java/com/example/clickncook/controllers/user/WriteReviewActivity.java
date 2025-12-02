@@ -26,7 +26,7 @@ public class WriteReviewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_write_review);
+        setContentView(R.layout.activity_review);
 
         db = FirebaseFirestore.getInstance();
 
@@ -34,9 +34,11 @@ public class WriteReviewActivity extends AppCompatActivity {
         recipeTitle = getIntent().getStringExtra("RECIPE_TITLE");
         recipeImg = getIntent().getStringExtra("RECIPE_IMG");
 
-        ratingBar = findViewById(R.id.rating_bar_input);
-        etComment = findViewById(R.id.et_review_comment);
-        Button btnSubmit = findViewById(R.id.btn_submit_review);
+        ratingBar = findViewById(R.id.ratingBar);
+        etComment = findViewById(R.id.etComment);
+        Button btnSubmit = findViewById(R.id.btnSubmit);
+
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         btnSubmit.setOnClickListener(v -> submitReview());
     }
@@ -63,7 +65,7 @@ public class WriteReviewActivity extends AppCompatActivity {
         review.setComment(comment);
 
         final DocumentReference recipeRef = db.collection("recipes").document(recipeId);
-        final DocumentReference reviewRef = db.collection("reviews").document(); // ID baru auto
+        final DocumentReference reviewRef = db.collection("reviews").document();
 
         db.runTransaction(new Transaction.Function<Void>() {
             @Override

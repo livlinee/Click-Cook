@@ -28,23 +28,17 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_report_admin, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_admin_report_card, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Report report = reportList.get(position);
-        holder.tvReason.setText(report.getReason());
-        holder.tvReporter.setText("Pelapor ID: " + report.getReporterUserId());
-        holder.tvReported.setText("Konten ID: " + report.getReportedContentId());
 
-        if (report.getStatus().equals("Pending")) {
-            holder.tvResolved.setVisibility(View.GONE);
-        } else {
-            holder.tvResolved.setVisibility(View.VISIBLE);
-            holder.tvResolved.setText(report.getStatus());
-        }
+        holder.tvViolationType.setText("Pelanggaran: " + report.getReason());
+        holder.tvReporter.setText("Pelapor ID: " + report.getReporterUserId());
+        holder.tvReported.setText("Konten Terlapor ID: " + report.getReportedContentId());
 
         holder.itemView.setOnClickListener(v -> listener.onClick(report));
         holder.itemView.setOnLongClickListener(v -> {
@@ -57,13 +51,13 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
     public int getItemCount() { return reportList.size(); }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvReason, tvReporter, tvReported, tvResolved;
+        TextView tvViolationType, tvReporter, tvReported;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvReason = itemView.findViewById(R.id.tv_reason);
-            tvReporter = itemView.findViewById(R.id.tv_reporter);
-            tvReported = itemView.findViewById(R.id.tv_reported_content);
-            tvResolved = itemView.findViewById(R.id.tv_status_resolved);
+            tvViolationType = itemView.findViewById(R.id.tvViolationType);
+            tvReporter = itemView.findViewById(R.id.tvUsers);
+            tvReported = itemView.findViewById(R.id.tvReportedUser);
         }
     }
 }
