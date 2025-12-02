@@ -36,18 +36,8 @@ public class AdminContentFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
         RecyclerView recyclerView = view.findViewById(R.id.rvContentList);
-        EditText etSearch = view.findViewById(R.id.searchSortBar).findViewById(R.id.cardSearch).findViewById(R.id.iconSearch).getRootView().findViewById(R.id.searchSortBar).findViewWithTag("search_edit_text");
 
-        // Manual binding karena etSearch ada di dalam CardView di dalam LinearLayout
-        // Menggunakan traversal sederhana jika ID unik:
-        EditText searchInput = null;
-        if (view.findViewById(R.id.searchSortBar) != null) {
-            // Cari EditText di hierarchy
-            // Untuk mempermudah, kita asumsikan ID nya unik di layout:
-            // Note: Di XML activity_admin_content, EditText tidak punya ID spesifik,
-            // hanya di activity_admin_users dan activity_home yang punya ID.
-            // Saya asumsikan Anda menambahkan ID @+id/etSearchContent di activity_admin_content.xml
-        }
+        EditText etSearch = view.findViewById(R.id.etSearchContent);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recipeList = new ArrayList<>();
@@ -57,6 +47,21 @@ public class AdminContentFragment extends Fragment {
             deleteRecipe(recipe);
         });
         recyclerView.setAdapter(adapter);
+
+        if (etSearch != null) {
+            etSearch.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    filter(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+        }
 
         loadContent();
 
@@ -72,19 +77,42 @@ public class AdminContentFragment extends Fragment {
                     recipeList.clear();
                     for (DocumentSnapshot doc : snapshots) {
                         Recipe r = doc.toObject(Recipe.class);
-                        r.setId(doc.getId());
-                        allRecipes.add(r);
-                        recipeList.add(r);
+                        if (r != null) {
+                            r.setId(doc.getId());
+                            allRecipes.add(r);
+                            recipeList.add(r);
+                        }
                     }
                     adapter.notifyDataSetChanged();
                 });
     }
 
+    private void filter(String text) {
+        recipeList.clear();
+        if (text.isEmpty()) {
+            recipeList.addAll(allRecipes);
+        } else {
+            text = text.toLowerCase();
+            for (Recipe item : allRecipes) {
+                if (item.getTitle().toLowerCase().contains(text) ||
+                        item.getUserName().toLowerCase().contains(text)) {
+                    recipeList.add(item);
+                }
+            }
+        }
+        adapter.notifyDataSetChanged();
+    }
+
     private void deleteRecipe(Recipe recipe) {
         db.collection("recipes").document(recipe.getId()).delete()
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Resep dihapus", Toast.LENGTH_SHORT).show();
-                    loadContent();
-                });
+                    Toast.makeText(getContext(), "Resep berhasil dihapus", Toast.LENGTH_SHORT).show();
+                    recipeList.remove(recipe);
+                    allRecipes.remove(recipe);
+                    adapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Gagal menghapus: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
     }
 }

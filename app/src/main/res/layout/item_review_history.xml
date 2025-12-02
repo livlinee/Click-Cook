@@ -2,6 +2,7 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
@@ -26,17 +27,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
+
         <TextView
             android:id="@+id/tvRecipeTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:layout_marginEnd="8dp"
             android:text="Nasi Goreng Rendang"
             android:textColor="@color/black_text"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/btnEdit"
             app:layout_constraintStart_toEndOf="@+id/imgRecipe"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -58,13 +58,12 @@
             android:id="@+id/tvDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:text="30 Nov 2025"
             android:textColor="@color/gray_text"
             android:textSize="10sp"
             app:layout_constraintBottom_toBottomOf="@+id/rbRating"
-            app:layout_constraintEnd_toStartOf="@+id/btnEdit"
-            app:layout_constraintTop_toTopOf="@+id/rbRating" />
+            app:layout_constraintTop_toTopOf="@+id/rbRating"
+            tools:layout_editor_absoluteX="314dp" />
 
         <TextView
             android:id="@+id/tvComment"
@@ -72,36 +71,23 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
             android:ellipsize="end"
             android:maxLines="2"
             android:text="Rasanya enak tapi terlalu pedas untuk saya..."
             android:textColor="@color/black_text"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btnEdit"
             app:layout_constraintStart_toEndOf="@+id/imgRecipe"
             app:layout_constraintTop_toBottomOf="@+id/rbRating" />
-
-        <ImageView
-            android:id="@+id/btnEdit"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/ic_edit"
-            app:tint="#BDBDBD"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/btnDelete"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_marginTop="16dp"
             android:src="@drawable/ic_delete"
-            app:tint="#BDBDBD"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnEdit" />
+            app:tint="#BDBDBD" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

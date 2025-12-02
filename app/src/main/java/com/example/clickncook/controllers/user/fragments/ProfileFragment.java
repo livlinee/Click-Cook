@@ -1,8 +1,8 @@
 package com.example.clickncook.controllers.user.fragments;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +25,7 @@ import com.example.clickncook.views.adapter.RecipeAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,12 +42,18 @@ public class ProfileFragment extends Fragment {
     private TextView tvTabPub, tvTabDraft;
     private View indicatorPub, indicatorDraft;
 
+    private ListenerRegistration profileListener;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_profile, container, false);
 
         db = FirebaseFirestore.getInstance();
+
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return view;
+        }
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         ImageView imgAvatar = view.findViewById(R.id.imgProfile);
@@ -68,14 +75,36 @@ public class ProfileFragment extends Fragment {
         view.findViewById(R.id.btnSettings).setOnClickListener(v -> startActivity(new Intent(getContext(), SettingsActivity.class)));
         view.findViewById(R.id.btnCreateRecipeBottom).setOnClickListener(v -> startActivity(new Intent(getContext(), AddRecipeActivity.class)));
 
-        db.collection("users").document(currentUserId).get().addOnSuccessListener(doc -> {
-            if (doc.exists()) {
-                tvName.setText(doc.getString("name"));
-                tvBio.setText(doc.getString("bio"));
-                String photoUrl = doc.getString("photoUrl");
-                if (photoUrl != null) Glide.with(this).load(photoUrl).circleCrop().into(imgAvatar);
-            }
-        });
+        profileListener = db.collection("users").document(currentUserId)
+                .addSnapshotListener((doc, e) -> {
+                    if (e != null) {
+                        Log.e("ProfileFragment", "Listen failed.", e);
+                        return;
+                    }
+
+                    if (doc != null && doc.exists() && isAdded() && getContext() != null) {
+                        String name = doc.getString("name");
+                        String bio = doc.getString("bio");
+                        String photoUrl = doc.getString("photoUrl");
+
+                        tvName.setText(name);
+                        tvBio.setText(bio != null ? bio : "");
+
+                        if (photoUrl != null && !photoUrl.isEmpty()) {
+                            imgAvatar.clearColorFilter();
+
+                            Glide.with(requireContext())
+                                    .load(photoUrl)
+                                    .circleCrop()
+                                    .placeholder(R.drawable.ic_person_placeholder)
+                                    .error(R.drawable.ic_person_placeholder)
+                                    .into(imgAvatar);
+                        } else {
+                            imgAvatar.setImageResource(R.drawable.ic_person_placeholder);
+                            imgAvatar.setColorFilter(ContextCompat.getColor(requireContext(), R.color.gray_text));
+                        }
+                    }
+                });
 
         setupRecyclers();
 
@@ -86,6 +115,14 @@ public class ProfileFragment extends Fragment {
         loadRecipes(true);
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (profileListener != null) {
+            profileListener.remove();
+        }
     }
 
     private void setupRecyclers() {
@@ -109,6 +146,8 @@ public class ProfileFragment extends Fragment {
     }
 
     private void switchTab(boolean isPublished) {
+        if (getContext() == null) return;
+
         int activeColor = ContextCompat.getColor(getContext(), R.color.primary_orange);
         int inactiveColor = ContextCompat.getColor(getContext(), R.color.gray_text);
         int inactiveStroke = ContextCompat.getColor(getContext(), R.color.gray_stroke);
@@ -166,11 +205,12 @@ public class ProfileFragment extends Fragment {
                     }
                     targetAdapter.notifyDataSetChanged();
 
-                    boolean isPubTabActive = indicatorPub.getSolidColor() == ContextCompat.getColor(getContext(), R.color.primary_orange); // Simplifikasi logic cek
-                    if(tvTabPub.getCurrentTextColor() == ContextCompat.getColor(getContext(), R.color.primary_orange)) {
-                        switchTab(true);
-                    } else {
-                        switchTab(false);
+                    if(getContext() != null) {
+                        if(tvTabPub.getCurrentTextColor() == ContextCompat.getColor(getContext(), R.color.primary_orange)) {
+                            switchTab(true);
+                        } else {
+                            switchTab(false);
+                        }
                     }
                 });
     }

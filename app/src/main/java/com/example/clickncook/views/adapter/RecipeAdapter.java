@@ -34,7 +34,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public int getItemViewType(int position) {
-        return recipeList.get(position).isDraft() ? TYPE_DRAFT : TYPE_NORMAL;
+        return recipeList.get(position).getIsDraft() ? TYPE_DRAFT : TYPE_NORMAL;
     }
 
     @NonNull

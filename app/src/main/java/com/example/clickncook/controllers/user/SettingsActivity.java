@@ -15,12 +15,13 @@ import com.bumptech.glide.Glide;
 import com.example.clickncook.R;
 import com.example.clickncook.controllers.auth.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -62,7 +63,6 @@ public class SettingsActivity extends AppCompatActivity {
                 });
 
         btnChangePhoto.setOnClickListener(v -> launcher.launch("image/*"));
-
         btnSave.setOnClickListener(v -> saveProfile());
 
         btnLogout.setOnClickListener(v -> {
@@ -77,19 +77,22 @@ public class SettingsActivity extends AppCompatActivity {
     private void loadUserData() {
         if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
+
         db.collection("users").document(uid).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
                 etName.setText(doc.getString("name"));
                 etBio.setText(doc.getString("bio"));
                 currentPhotoUrl = doc.getString("photoUrl");
-                if (currentPhotoUrl != null) Glide.with(this).load(currentPhotoUrl).centerCrop().into(imgProfile);
+                if (currentPhotoUrl != null && !isDestroyed()) {
+                    Glide.with(this).load(currentPhotoUrl).centerCrop().into(imgProfile);
+                }
             }
         });
     }
 
     private void saveProfile() {
-        String newName = etName.getText().toString();
-        String newBio = etBio.getText().toString();
+        String newName = etName.getText().toString().trim();
+        String newBio = etBio.getText().toString().trim();
 
         if (TextUtils.isEmpty(newName)) {
             etName.setError("Nama tidak boleh kosong");
@@ -101,41 +104,47 @@ public class SettingsActivity extends AppCompatActivity {
 
         if (imageUri != null) {
             StorageReference ref = storageRef.child("profile_images/" + mAuth.getCurrentUser().getUid());
-            ref.putFile(imageUri).addOnSuccessListener(task -> ref.getDownloadUrl().addOnSuccessListener(uri -> {
-                performBatchUpdate(newName, newBio, uri.toString());
-            }));
+            ref.putFile(imageUri)
+                    .addOnSuccessListener(task -> ref.getDownloadUrl().addOnSuccessListener(uri -> {
+                        updateFirestore(newName, newBio, uri.toString());
+                    }))
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Gagal upload foto", Toast.LENGTH_SHORT).show();
+                        btnSave.setEnabled(true);
+                        btnSave.setText("Simpan");
+                    });
         } else {
-            performBatchUpdate(newName, newBio, currentPhotoUrl);
+            updateFirestore(newName, newBio, currentPhotoUrl);
         }
     }
 
-    private void performBatchUpdate(String name, String bio, String photoUrl) {
+    private void updateFirestore(String name, String bio, String photoUrl) {
         String uid = mAuth.getCurrentUser().getUid();
-        WriteBatch batch = db.batch();
 
-        DocumentReference userRef = db.collection("users").document(uid);
-        batch.update(userRef, "name", name, "bio", bio, "photoUrl", photoUrl);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("name", name);
+        updates.put("bio", bio);
+        updates.put("photoUrl", photoUrl);
 
-        // Update juga data user di resep dan review agar sinkron
-        db.collection("recipes").whereEqualTo("userId", uid).get()
-                .addOnSuccessListener(recipeSnapshots -> {
-                    for (DocumentSnapshot doc : recipeSnapshots) {
-                        batch.update(doc.getReference(), "userName", name, "userPhotoUrl", photoUrl);
+        db.collection("users").document(uid)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    if(user != null) {
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(name)
+                                .setPhotoUri(photoUrl != null ? Uri.parse(photoUrl) : null)
+                                .build();
+                        user.updateProfile(profileUpdates);
                     }
-                    db.collection("reviews").whereEqualTo("userId", uid).get()
-                            .addOnSuccessListener(reviewSnapshots -> {
-                                for (DocumentSnapshot doc : reviewSnapshots) {
-                                    batch.update(doc.getReference(), "userName", name, "userPhotoUrl", photoUrl);
-                                }
-                                batch.commit().addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(this, "Profil Berhasil Diupdate!", Toast.LENGTH_SHORT).show();
-                                    finish();
-                                }).addOnFailureListener(e -> {
-                                    btnSave.setEnabled(true);
-                                    btnSave.setText("Simpan");
-                                    Toast.makeText(this, "Gagal update: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                });
-                            });
+
+                    Toast.makeText(this, "Profil Berhasil Diupdate!", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    btnSave.setEnabled(true);
+                    btnSave.setText("Simpan");
+                    Toast.makeText(this, "Gagal update: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 }

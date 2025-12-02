@@ -2,6 +2,7 @@ package com.example.clickncook.controllers.admin;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import com.example.clickncook.R;
 import com.example.clickncook.controllers.admin.fragments.AdminContentFragment;
 import com.example.clickncook.controllers.admin.fragments.AdminHomeFragment;
@@ -18,26 +19,32 @@ public class AdminMainActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNav = findViewById(R.id.admin_bottom_nav);
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.admin_container, new AdminHomeFragment()).commit();
+        loadFragment(new AdminHomeFragment());
 
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.menu_dashboard) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.admin_container, new AdminHomeFragment()).commit();
+                loadFragment(new AdminHomeFragment());
+                return true;
+            } else if (id == R.id.menu_content) {
+                // Perbaikan: Fitur ini sekarang aktif
+                loadFragment(new AdminContentFragment());
                 return true;
             } else if (id == R.id.menu_users) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.admin_container, new AdminUsersFragment()).commit();
+                loadFragment(new AdminUsersFragment());
                 return true;
             } else if (id == R.id.menu_reports) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.admin_container, new AdminReportsFragment()).commit();
+                loadFragment(new AdminReportsFragment());
                 return true;
             }
-            // Tambahkan item menu ini di XML menu/admin_nav_menu.xml jika ingin navigasi Content
-            // else if (id == R.id.menu_content) {
-            //    getSupportFragmentManager().beginTransaction().replace(R.id.admin_container, new AdminContentFragment()).commit();
-            //    return true;
-            // }
             return false;
         });
+    }
+
+    private void loadFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.admin_container, fragment)
+                .commit();
     }
 }

@@ -1,6 +1,7 @@
 package com.example.clickncook.models;
 
 import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.PropertyName;
 import com.google.firebase.firestore.ServerTimestamp;
 import java.io.Serializable;
 import java.util.Date;
@@ -14,7 +15,7 @@ public class Recipe implements Serializable {
     private List<String> steps;
     private String imageUrl;
     private String cookTime;
-    private int servings;
+    private String servings;
     private String category;
     private String difficulty;
 
@@ -52,8 +53,8 @@ public class Recipe implements Serializable {
     public String getCookTime() { return cookTime; }
     public void setCookTime(String cookTime) { this.cookTime = cookTime; }
 
-    public int getServings() { return servings; }
-    public void setServings(int servings) { this.servings = servings; }
+    public String getServings() { return servings; }
+    public void setServings(String servings) { this.servings = servings; }
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
@@ -79,8 +80,10 @@ public class Recipe implements Serializable {
     public int getViewCount() { return viewCount; }
     public void setViewCount(int viewCount) { this.viewCount = viewCount; }
 
-    public boolean isDraft() { return isDraft; }
-    public void setDraft(boolean draft) { isDraft = draft; }
+    @PropertyName("isDraft")
+    public boolean getIsDraft() { return isDraft; }
+    @PropertyName("isDraft")
+    public void setIsDraft(boolean draft) { isDraft = draft; }
 
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }

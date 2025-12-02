@@ -41,7 +41,6 @@ public class IngredientAdapter extends RecyclerView.Adapter<IngredientAdapter.Vi
         if (isStep) {
             holder.tvStepNumber.setText(String.valueOf(position + 1));
             holder.tvStepInstruction.setText(data);
-            holder.tvStepTime.setText("Estimasi: 5 min");
         } else {
             holder.tvIngredientName.setText(data);
             holder.tvIngredientAmount.setText("");
@@ -60,7 +59,6 @@ public class IngredientAdapter extends RecyclerView.Adapter<IngredientAdapter.Vi
             if (isStepLayout) {
                 tvStepNumber = itemView.findViewById(R.id.tvStepNumber);
                 tvStepInstruction = itemView.findViewById(R.id.tvStepInstruction);
-                tvStepTime = itemView.findViewById(R.id.tvStepTime);
             } else {
                 tvIngredientName = itemView.findViewById(R.id.tvIngredientName);
                 tvIngredientAmount = itemView.findViewById(R.id.tvIngredientAmount);

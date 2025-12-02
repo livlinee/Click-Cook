@@ -24,6 +24,8 @@ import com.example.clickncook.models.Review;
 import com.example.clickncook.views.adapter.IngredientAdapter;
 import com.example.clickncook.views.adapter.ReviewAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,12 +36,16 @@ import java.util.List;
 public class DetailRecipeActivity extends AppCompatActivity {
 
     private Recipe recipe;
-    private ImageButton btnFavorite;
+    private FloatingActionButton btnFavorite;
     private boolean isFavorited = false;
     private String bookmarkId = null;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private RecyclerView rvIngredients, rvSteps, rvReviews;
+    private MaterialButton btnBahan, btnCara, btnUlasan;
+
+    private ReviewAdapter reviewAdapter;
+    private List<Review> reviewList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +61,14 @@ public class DetailRecipeActivity extends AppCompatActivity {
         TextView tvTitle = findViewById(R.id.recipe_title);
         TextView tvTime = findViewById(R.id.recipe_duration);
         RatingBar ratingBar = findViewById(R.id.rating_bar);
+
         btnFavorite = findViewById(R.id.btn_favorite_inline);
         ImageButton btnBack = findViewById(R.id.btn_back);
         ImageButton btnReport = findViewById(R.id.btn_warning_header);
+
+        btnBahan = findViewById(R.id.btn_bahan);
+        btnCara = findViewById(R.id.btn_cara_masak);
+        btnUlasan = findViewById(R.id.btn_lihat_ulasan);
 
         rvIngredients = findViewById(R.id.rvIngredients);
         rvSteps = findViewById(R.id.rvSteps);
@@ -67,24 +78,35 @@ public class DetailRecipeActivity extends AppCompatActivity {
         rvSteps.setLayoutManager(new LinearLayoutManager(this));
         rvReviews.setLayoutManager(new LinearLayoutManager(this));
 
+        reviewList = new ArrayList<>();
+        reviewAdapter = new ReviewAdapter(this, reviewList);
+        rvReviews.setAdapter(reviewAdapter);
+
         if (recipe != null) {
             tvTitle.setText(recipe.getTitle());
-            tvTime.setText(recipe.getCookTime());
+
+            String metaInfo = recipe.getCookTime();
+            if (recipe.getDifficulty() != null) {
+                metaInfo += " • " + recipe.getDifficulty();
+            }
+            tvTime.setText(metaInfo);
+
             if (recipe.getAverageRating() > 0) {
                 ratingBar.setRating((float) recipe.getAverageRating());
             }
-            Glide.with(this).load(recipe.getImageUrl()).into(imgCover);
+            Glide.with(this).load(recipe.getImageUrl()).centerCrop().into(imgCover);
 
             if (mAuth.getCurrentUser() != null) checkFavoriteStatus();
         }
 
-        findViewById(R.id.btn_bahan).setOnClickListener(v -> showTab("ingredients"));
-        findViewById(R.id.btn_cara_masak).setOnClickListener(v -> showTab("steps"));
-        findViewById(R.id.btn_lihat_ulasan).setOnClickListener(v -> showTab("reviews"));
+        btnBahan.setOnClickListener(v -> showTab("ingredients"));
+        btnCara.setOnClickListener(v -> showTab("steps"));
+        btnUlasan.setOnClickListener(v -> showTab("reviews"));
 
         showIngredients();
         showSteps();
         showReviews();
+
         showTab("ingredients");
 
         btnFavorite.setOnClickListener(v -> toggleFavorite());
@@ -159,15 +181,22 @@ public class DetailRecipeActivity extends AppCompatActivity {
         findViewById(R.id.tvStepsHeader).setVisibility(View.GONE);
         findViewById(R.id.tvReviewsHeader).setVisibility(View.GONE);
 
+        btnBahan.setSelected(false);
+        btnCara.setSelected(false);
+        btnUlasan.setSelected(false);
+
         if (tab.equals("ingredients")) {
             rvIngredients.setVisibility(View.VISIBLE);
             findViewById(R.id.tvIngredientsHeader).setVisibility(View.VISIBLE);
+            btnBahan.setSelected(true);
         } else if (tab.equals("steps")) {
             rvSteps.setVisibility(View.VISIBLE);
             findViewById(R.id.tvStepsHeader).setVisibility(View.VISIBLE);
+            btnCara.setSelected(true);
         } else if (tab.equals("reviews")) {
             rvReviews.setVisibility(View.VISIBLE);
             findViewById(R.id.tvReviewsHeader).setVisibility(View.VISIBLE);
+            btnUlasan.setSelected(true);
         }
     }
 
@@ -185,11 +214,11 @@ public class DetailRecipeActivity extends AppCompatActivity {
                 .orderBy("createdAt", Query.Direction.DESCENDING);
 
         query.get().addOnSuccessListener(snapshots -> {
-            List<Review> reviews = new ArrayList<>();
+            reviewList.clear();
             for (DocumentSnapshot doc : snapshots) {
-                reviews.add(doc.toObject(Review.class));
+                reviewList.add(doc.toObject(Review.class));
             }
-            rvReviews.setAdapter(new ReviewAdapter(this, reviews));
+            reviewAdapter.notifyDataSetChanged();
         });
     }
 
@@ -206,7 +235,7 @@ public class DetailRecipeActivity extends AppCompatActivity {
                         btnFavorite.setImageResource(R.drawable.ic_heart_filled);
                     } else {
                         isFavorited = false;
-                        btnFavorite.setImageResource(R.drawable.ic_nav_favorite);
+                        btnFavorite.setImageResource(R.drawable.ic_heart_outline);
                     }
                 });
     }
@@ -221,7 +250,7 @@ public class DetailRecipeActivity extends AppCompatActivity {
                 db.collection("bookmarks").document(bookmarkId).delete()
                         .addOnSuccessListener(aVoid -> {
                             isFavorited = false;
-                            btnFavorite.setImageResource(R.drawable.ic_nav_favorite);
+                            btnFavorite.setImageResource(R.drawable.ic_heart_outline);
                             Toast.makeText(this, "Dihapus dari Favorit", Toast.LENGTH_SHORT).show();
                         });
             }

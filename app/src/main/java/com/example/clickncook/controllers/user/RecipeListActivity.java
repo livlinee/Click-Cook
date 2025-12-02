@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clickncook.R;
 import com.example.clickncook.models.Recipe;
 import com.example.clickncook.views.adapter.RecipeAdapter;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
@@ -45,12 +46,39 @@ public class RecipeListActivity extends AppCompatActivity {
 
         String type = getIntent().getStringExtra("LIST_TYPE");
         String title = getIntent().getStringExtra("LIST_TITLE");
+        String searchQuery = getIntent().getStringExtra("SEARCH_QUERY");
 
-        if (title != null) {
-            tvTitle.setText(title.toUpperCase());
+        if (searchQuery != null) {
+            tvTitle.setText("HASIL PENCARIAN: \"" + searchQuery + "\"");
+            performSearch(searchQuery);
+        } else {
+            if (title != null) {
+                tvTitle.setText(title.toUpperCase());
+            }
+            loadData(type);
         }
+    }
 
-        loadData(type);
+    private void performSearch(String keyword) {
+        db.collection("recipes")
+                .whereEqualTo("isDraft", false)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    recipeList.clear();
+                    String lowerKeyword = keyword.toLowerCase();
+
+                    for (DocumentSnapshot doc : snapshots) {
+                        Recipe r = doc.toObject(Recipe.class);
+                        if (r != null) {
+                            r.setId(doc.getId());
+                            if (r.getTitle().toLowerCase().contains(lowerKeyword)) {
+                                recipeList.add(r);
+                            }
+                        }
+                    }
+                    adapter.notifyDataSetChanged();
+                });
     }
 
     private void loadData(String type) {
@@ -71,16 +99,20 @@ public class RecipeListActivity extends AppCompatActivity {
                     query = query.whereEqualTo("category", "Nusantara");
                     break;
                 default:
-                    query = query.whereEqualTo("category", type);
+                    if (!type.equals("Semua")) {
+                        query = query.whereEqualTo("category", type);
+                    }
                     break;
             }
         }
 
         query.get().addOnSuccessListener(snapshots -> {
             recipeList.clear();
-            recipeList.addAll(snapshots.toObjects(Recipe.class));
-            for (int i = 0; i < snapshots.size(); i++) {
-                recipeList.get(i).setId(snapshots.getDocuments().get(i).getId());
+            if (snapshots != null) {
+                recipeList.addAll(snapshots.toObjects(Recipe.class));
+                for (int i = 0; i < snapshots.size(); i++) {
+                    recipeList.get(i).setId(snapshots.getDocuments().get(i).getId());
+                }
             }
             adapter.notifyDataSetChanged();
         });
