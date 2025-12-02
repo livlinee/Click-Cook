@@ -1,5 +1,6 @@
 package com.example.clickncook.controllers.auth;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -10,13 +11,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.clickncook.R;
 import com.example.clickncook.controllers.admin.AdminMainActivity;
 import com.example.clickncook.controllers.user.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
@@ -73,7 +75,16 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        checkUserRoleAndStatus(mAuth.getCurrentUser().getUid());
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            if (user.isEmailVerified()) {
+                                checkUserRoleAndStatus(user.getUid());
+                            } else {
+                                mAuth.signOut();
+                                setLoading(false);
+                                showVerificationDialog(user);
+                            }
+                        }
                     } else {
                         setLoading(false);
                         Toast.makeText(LoginActivity.this, "Login Gagal: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
@@ -85,19 +96,18 @@ public class LoginActivity extends AppCompatActivity {
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(document -> {
                     setLoading(false);
-
                     if (document.exists()) {
                         Boolean isBlocked = document.getBoolean("isBlocked");
                         if (isBlocked != null && isBlocked) {
                             mAuth.signOut();
-                            Toast.makeText(this, "Akun Anda telah DIBLOKIR oleh Admin karena pelanggaran.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "Akun Anda diblokir Admin.", Toast.LENGTH_LONG).show();
                             return;
                         }
 
                         String role = document.getString("role");
                         if ("admin".equals(role)) {
                             Intent intent = new Intent(LoginActivity.this, AdminMainActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Hapus history back stack
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
                         } else {
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -105,17 +115,29 @@ public class LoginActivity extends AppCompatActivity {
                             startActivity(intent);
                         }
                         finish();
-
                     } else {
-                        Toast.makeText(this, "Data pengguna tidak ditemukan di Database.", Toast.LENGTH_SHORT).show();
                         mAuth.signOut();
+                        Toast.makeText(this, "Data profil tidak ditemukan.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
                     setLoading(false);
                     mAuth.signOut();
-                    Toast.makeText(this, "Gagal mengambil data profil. Cek koneksi internet.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Gagal koneksi database.", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private void showVerificationDialog(FirebaseUser user) {
+        new AlertDialog.Builder(this)
+                .setTitle("Verifikasi Email Diperlukan")
+                .setMessage("Email " + etEmail.getText().toString() + " belum diverifikasi. Silakan cek inbox/spam Anda.")
+                .setPositiveButton("Kirim Ulang Email", (dialog, which) -> {
+                    user.sendEmailVerification()
+                            .addOnSuccessListener(aVoid -> Toast.makeText(this, "Email terkirim!", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Toast.makeText(this, "Gagal kirim ulang.", Toast.LENGTH_SHORT).show());
+                })
+                .setNegativeButton("Tutup", null)
+                .show();
     }
 
     private void setLoading(boolean isLoading) {
@@ -126,7 +148,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             progressBar.setVisibility(View.GONE);
             btnLogin.setEnabled(true);
-            btnLogin.setText("Login");
+            btnLogin.setText("Masuk");
         }
     }
 }
