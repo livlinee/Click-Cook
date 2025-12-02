@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <ImageView android:id="@+id/img_cover"
+            android:layout_width="match_parent" android:layout_height="250dp"
+            android:scaleType="centerCrop" android:src="@android:drawable/ic_menu_gallery"/>
+
+        <LinearLayout android:padding="16dp" android:orientation="vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+
+            <TextView android:id="@+id/tv_title" android:text="Judul" android:textSize="24sp" android:textStyle="bold"
+                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:id="@+id/tv_author" android:text="Oleh: User" android:layout_marginTop="4dp"
+                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <LinearLayout android:orientation="horizontal" android:layout_marginTop="8dp" android:gravity="center_vertical"
+                android:layout_width="match_parent" android:layout_height="wrap_content">
+                <RatingBar android:id="@+id/rating_bar_display" style="?android:attr/ratingBarStyleSmall"
+                    android:numStars="5" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tv_rating_summary" android:text="4.5" android:layout_marginStart="8dp"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+                <Space android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+
+                <ImageView android:id="@+id/btn_report_exclamation" android:src="@android:drawable/stat_notify_error"
+                    android:padding="8dp" android:layout_width="40dp" android:layout_height="40dp"/>
+                <ImageView android:id="@+id/btn_favorite_heart" android:src="@drawable/ic_heart_outline"
+                    android:padding="8dp" android:layout_width="40dp" android:layout_height="40dp"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_marginTop="16dp" android:orientation="horizontal"
+                android:layout_width="match_parent" android:layout_height="wrap_content">
+                <Button android:id="@+id/btn_ingredients" android:text="Bahan" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content"/>
+                <Button android:id="@+id/btn_steps" android:text="Cara" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content"/>
+                <Button android:id="@+id/btn_reviews" android:text="Ulasan" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/recycler_content"
+                android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp"/>
+
+            <Button android:id="@+id/btn_write_review" android:text="Tulis Ulasan" android:layout_marginTop="24dp"
+                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
