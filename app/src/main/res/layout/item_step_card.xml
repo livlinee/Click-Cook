@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="20dp"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFF8F3"
+    app:strokeColor="#FFC8B3"
+    app:strokeWidth="1dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvStepNumber"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/bg_circle_primary"
+            android:gravity="center"
+            android:text="1"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/tvStepTime"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvStepInstruction"
+            android:layout_width="336dp"
+            android:layout_height="58dp"
+            android:text="Cuci beras dengan air dingin mengalir, tiriskan, dan masukkan ke panci kecil. Tambahkan kaldu lalu rebus dengan api besar hingga mendidih."
+            android:textColor="@color/black_text"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toBottomOf="@+id/tvStepNumber"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvStepTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="⏱ 5-10 min"
+            android:textColor="@color/primary_orange"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tvStepInstruction"
+            app:layout_constraintTop_toBottomOf="@+id/tvStepInstruction" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
