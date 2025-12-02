@@ -13,16 +13,30 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ClicknCook">
+        android:theme="@style/Theme.ClicknCook"
+        tools:targetApi="31">
+
         <activity
-            android:name=".MainActivity"
+            android:name=".controllers.auth.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".controllers.auth.LoginActivity" />
+        <activity android:name=".controllers.auth.RegisterActivity" />
+        <activity android:name=".controllers.auth.ForgotPasswordActivity" />
+
+        <activity android:name=".controllers.user.MainActivity" />
+        <activity android:name=".controllers.user.DetailRecipeActivity" />
+        <activity android:name=".controllers.user.AddRecipeActivity" />
+        <activity android:name=".controllers.user.WriteReviewActivity" />
+        <activity android:name=".controllers.user.SettingsActivity" />
+
+        <activity android:name=".controllers.admin.AdminMainActivity" />
+
     </application>
 
 </manifest>
