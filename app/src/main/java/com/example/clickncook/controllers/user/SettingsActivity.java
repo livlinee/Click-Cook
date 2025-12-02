@@ -15,7 +15,6 @@ import com.bumptech.glide.Glide;
 import com.example.clickncook.R;
 import com.example.clickncook.controllers.auth.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -25,7 +24,7 @@ import com.google.firebase.storage.StorageReference;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private EditText etName, etBio;
+    private EditText etName, etBio, etOldPass, etNewPass;
     private ImageView imgProfile;
     private Button btnSave, btnLogout;
     private Uri imageUri;
@@ -37,17 +36,20 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(R.layout.dialog_settings);
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
 
-        imgProfile = findViewById(R.id.img_profile_edit);
-        etName = findViewById(R.id.et_edit_name);
-        etBio = findViewById(R.id.et_edit_bio);
-        btnSave = findViewById(R.id.btn_save_profile);
-        btnLogout = findViewById(R.id.btn_logout);
+        imgProfile = findViewById(R.id.imgProfilePhoto);
+        etName = findViewById(R.id.etName);
+        etBio = findViewById(R.id.etBio);
+        etOldPass = findViewById(R.id.etOldPass);
+        etNewPass = findViewById(R.id.etNewPass);
+        btnSave = findViewById(R.id.btnSavePassword);
+        btnLogout = findViewById(R.id.btnLogout);
+        ImageView btnChangePhoto = findViewById(R.id.btnChangePhoto);
 
         loadUserData();
 
@@ -58,7 +60,8 @@ public class SettingsActivity extends AppCompatActivity {
                         imgProfile.setImageURI(uri);
                     }
                 });
-        imgProfile.setOnClickListener(v -> launcher.launch("image/*"));
+
+        btnChangePhoto.setOnClickListener(v -> launcher.launch("image/*"));
 
         btnSave.setOnClickListener(v -> saveProfile());
 
@@ -72,13 +75,14 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void loadUserData() {
+        if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
         db.collection("users").document(uid).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
                 etName.setText(doc.getString("name"));
                 etBio.setText(doc.getString("bio"));
                 currentPhotoUrl = doc.getString("photoUrl");
-                if (currentPhotoUrl != null) Glide.with(this).load(currentPhotoUrl).circleCrop().into(imgProfile);
+                if (currentPhotoUrl != null) Glide.with(this).load(currentPhotoUrl).centerCrop().into(imgProfile);
             }
         });
     }
@@ -112,23 +116,23 @@ public class SettingsActivity extends AppCompatActivity {
         DocumentReference userRef = db.collection("users").document(uid);
         batch.update(userRef, "name", name, "bio", bio, "photoUrl", photoUrl);
 
+        // Update juga data user di resep dan review agar sinkron
         db.collection("recipes").whereEqualTo("userId", uid).get()
                 .addOnSuccessListener(recipeSnapshots -> {
                     for (DocumentSnapshot doc : recipeSnapshots) {
                         batch.update(doc.getReference(), "userName", name, "userPhotoUrl", photoUrl);
                     }
-
                     db.collection("reviews").whereEqualTo("userId", uid).get()
                             .addOnSuccessListener(reviewSnapshots -> {
                                 for (DocumentSnapshot doc : reviewSnapshots) {
                                     batch.update(doc.getReference(), "userName", name, "userPhotoUrl", photoUrl);
                                 }
-
                                 batch.commit().addOnSuccessListener(aVoid -> {
                                     Toast.makeText(this, "Profil Berhasil Diupdate!", Toast.LENGTH_SHORT).show();
                                     finish();
                                 }).addOnFailureListener(e -> {
                                     btnSave.setEnabled(true);
+                                    btnSave.setText("Simpan");
                                     Toast.makeText(this, "Gagal update: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 });
                             });

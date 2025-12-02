@@ -1,7 +1,9 @@
 package com.example.clickncook.controllers.auth;
 
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -16,8 +18,23 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
 
-        EditText etEmail = findViewById(R.id.et_email_reset);
-        Button btnSend = findViewById(R.id.btn_send_reset);
+        EditText etEmail = findViewById(R.id.etEmail);
+        Button btnSend = findViewById(R.id.btnSendLink);
+
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+
+        etEmail.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                btnSend.setEnabled(!s.toString().trim().isEmpty());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         btnSend.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();

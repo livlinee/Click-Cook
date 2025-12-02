@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,14 +25,19 @@ public class ReviewHistoryFragment extends Fragment {
     private FirebaseFirestore db;
     private ReviewHistoryAdapter adapter;
     private List<Review> reviewList;
+    private LinearLayout emptyState;
+    private RecyclerView recyclerView;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_review_history, container, false);
+        View view = inflater.inflate(R.layout.activity_review_history, container, false);
 
         db = FirebaseFirestore.getInstance();
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_review_history);
+
+        recyclerView = view.findViewById(R.id.rvReviewHistory);
+        emptyState = view.findViewById(R.id.layoutEmptyState);
+
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         reviewList = new ArrayList<>();
@@ -58,6 +64,14 @@ public class ReviewHistoryFragment extends Fragment {
                         reviewList.add(r);
                     }
                     adapter.notifyDataSetChanged();
+
+                    if (reviewList.isEmpty()) {
+                        emptyState.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    } else {
+                        emptyState.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                    }
                 });
     }
 
@@ -67,6 +81,10 @@ public class ReviewHistoryFragment extends Fragment {
                     reviewList.remove(review);
                     adapter.notifyDataSetChanged();
                     Toast.makeText(getContext(), "Ulasan dihapus", Toast.LENGTH_SHORT).show();
+                    if (reviewList.isEmpty()) {
+                        emptyState.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    }
                 });
     }
 }

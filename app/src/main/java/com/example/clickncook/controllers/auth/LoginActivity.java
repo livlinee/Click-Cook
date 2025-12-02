@@ -2,8 +2,9 @@ package com.example.clickncook.controllers.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
-import android.view.View;
+import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -38,6 +39,24 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         tvRegister = findViewById(R.id.tvRegisterLink);
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
+
+        TextWatcher loginWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String email = etEmail.getText().toString().trim();
+                String password = etPassword.getText().toString().trim();
+                btnLogin.setEnabled(!email.isEmpty() && !password.isEmpty());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+
+        etEmail.addTextChangedListener(loginWatcher);
+        etPassword.addTextChangedListener(loginWatcher);
 
         btnLogin.setOnClickListener(v -> performLogin());
 

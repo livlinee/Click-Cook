@@ -62,11 +62,11 @@ public class ReviewHistoryAdapter extends RecyclerView.Adapter<ReviewHistoryAdap
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            imgRecipe = itemView.findViewById(R.id.img_recipe_thumb);
-            tvRecipeName = itemView.findViewById(R.id.tv_recipe_name);
-            tvComment = itemView.findViewById(R.id.tv_comment);
-            ratingBar = itemView.findViewById(R.id.rating_bar_small);
-            btnDelete = itemView.findViewById(R.id.btn_delete_review);
+            imgRecipe = itemView.findViewById(R.id.imgRecipe);
+            tvRecipeName = itemView.findViewById(R.id.tvRecipeTitle);
+            tvComment = itemView.findViewById(R.id.tvComment);
+            ratingBar = itemView.findViewById(R.id.rbRating);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.clickncook.controllers.admin.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.clickncook.R;
-import com.example.clickncook.controllers.user.DetailRecipeActivity;
 import com.example.clickncook.models.Report;
 import com.example.clickncook.views.adapter.ReportAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -35,6 +33,9 @@ public class AdminReportsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_admin_reports, container, false);
 
+        View staticNav = view.findViewById(R.id.adminBottomNavContainer);
+        if (staticNav != null) staticNav.setVisibility(View.GONE);
+
         db = FirebaseFirestore.getInstance();
         RecyclerView recyclerView = view.findViewById(R.id.rvReports);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -50,7 +51,7 @@ public class AdminReportsFragment extends Fragment {
 
             @Override
             public void onLongClick(Report report) {
-                if (currentStatus.equals("Pending")) showActionDialog(report);
+                if ("Pending".equals(currentStatus)) showActionDialog(report);
             }
         });
         recyclerView.setAdapter(adapter);
@@ -77,8 +78,10 @@ public class AdminReportsFragment extends Fragment {
                     reportList.clear();
                     for (DocumentSnapshot doc : snapshots) {
                         Report r = doc.toObject(Report.class);
-                        r.setId(doc.getId());
-                        reportList.add(r);
+                        if (r != null) {
+                            r.setId(doc.getId());
+                            reportList.add(r);
+                        }
                     }
                     adapter.notifyDataSetChanged();
                 });

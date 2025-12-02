@@ -28,6 +28,9 @@ public class AdminUsersFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_admin_users, container, false);
 
+        View staticNav = view.findViewById(R.id.adminBottomNavContainer);
+        if (staticNav != null) staticNav.setVisibility(View.GONE);
+
         db = FirebaseFirestore.getInstance();
         RecyclerView recyclerView = view.findViewById(R.id.rvUserList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -48,8 +51,10 @@ public class AdminUsersFragment extends Fragment {
             userList.clear();
             for (DocumentSnapshot doc : snapshots) {
                 User u = doc.toObject(User.class);
-                u.setId(doc.getId());
-                userList.add(u);
+                if (u != null) {
+                    u.setId(doc.getId());
+                    userList.add(u);
+                }
             }
             adapter.notifyDataSetChanged();
         });
