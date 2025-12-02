@@ -26,39 +26,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/btnNotif"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="24dp"
-        android:background="@drawable/bg_notification_circle"
-        app:layout_constraintBottom_toBottomOf="@+id/tvHeaderTitle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tvHeaderTitle">
-
-        <ImageView
-            android:id="@+id/iconBell"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_notifications"
-            app:tint="#5A5A5A"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:id="@+id/notificationDot"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:background="@drawable/bg_notification_dot"
-            android:translationX="2dp"
-            android:translationY="-2dp"
-            app:layout_constraintEnd_toEndOf="@+id/iconBell"
-            app:layout_constraintTop_toTopOf="@+id/iconBell" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -218,26 +185,26 @@
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rowSpinners" />
-            
-        <LinearLayout
-            android:id="@+id/layoutIngredientsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@+id/labelIngredients">
-            
-            <EditText
-                android:id="@+id/etIngredient"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_input_field"
-                android:hint="Nama Bahan"
-                android:paddingHorizontal="16dp"
-                android:textColor="@color/black_text"
-                android:textSize="14sp" />
 
-        </LinearLayout>
+            <LinearLayout
+                android:id="@+id/layoutIngredientsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@+id/labelIngredients">
+
+                <EditText
+                    android:id="@+id/etIngredient"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_input_field"
+                    android:hint="Nama Bahan"
+                    android:paddingHorizontal="16dp"
+                    android:textColor="@color/black_text"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAddIngredient"
                 android:layout_width="match_parent"
@@ -263,26 +230,26 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/btnAddIngredient" />
 
-        <LinearLayout
-            android:id="@+id/layoutStepsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@+id/labelSteps">
-
-            <EditText
-                android:id="@+id/etStep"
+            <LinearLayout
+                android:id="@+id/layoutStepsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minLines="3"
-                android:gravity="top|start"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_input_field"
-                android:hint="Cara Masak"
-                android:padding="12dp"
-                android:textColor="@color/black_text"
-                android:textSize="14sp"/>
-        </LinearLayout>
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@+id/labelSteps">
+
+                <EditText
+                    android:id="@+id/etStep"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="3"
+                    android:gravity="top|start"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_input_field"
+                    android:hint="Cara Masak"
+                    android:padding="12dp"
+                    android:textColor="@color/black_text"
+                    android:textSize="14sp"/>
+            </LinearLayout>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAddStep"
                 android:layout_width="match_parent"
