@@ -8,12 +8,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.clickncook.R;
 import com.example.clickncook.models.Report;
+import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
 public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder> {
 
     private List<Report> reportList;
     private OnReportInteractListener listener;
+    private FirebaseFirestore db;
 
     public interface OnReportInteractListener {
         void onClick(Report report);
@@ -23,6 +25,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
     public ReportAdapter(List<Report> reportList, OnReportInteractListener listener) {
         this.reportList = reportList;
         this.listener = listener;
+        this.db = FirebaseFirestore.getInstance();
     }
 
     @NonNull
@@ -37,8 +40,42 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
         Report report = reportList.get(position);
 
         holder.tvViolationType.setText("Pelanggaran: " + report.getReason());
-        holder.tvReporter.setText("Pelapor ID: " + report.getReporterUserId());
-        holder.tvReported.setText("Konten Terlapor ID: " + report.getReportedContentId());
+
+        holder.tvReporter.setText("Pelapor: Memuat...");
+        db.collection("users").document(report.getReporterUserId())
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        String name = snapshot.getString("name");
+                        holder.tvReporter.setText("Pelapor: " + (name != null ? name : "Tanpa Nama"));
+                    } else {
+                        holder.tvReporter.setText("Pelapor: User Tidak Ditemukan");
+                    }
+                })
+                .addOnFailureListener(e -> holder.tvReporter.setText("Pelapor: Error"));
+
+        holder.tvReported.setText("Konten: Memuat...");
+
+        String collectionName = "recipe".equals(report.getContentType()) ? "recipes" : "reviews";
+
+        db.collection(collectionName).document(report.getReportedContentId())
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        if ("recipe".equals(report.getContentType())) {
+                            String title = snapshot.getString("title");
+                            holder.tvReported.setText("Resep: " + title);
+                        } else {
+                            String comment = snapshot.getString("comment");
+                            if (comment != null && comment.length() > 30) {
+                                comment = comment.substring(0, 30) + "...";
+                            }
+                            holder.tvReported.setText("Ulasan: " + (comment != null ? comment : "-"));
+                        }
+                    } else {
+                        holder.tvReported.setText("Konten: Sudah Dihapus");
+                    }
+                });
 
         holder.itemView.setOnClickListener(v -> listener.onClick(report));
         holder.itemView.setOnLongClickListener(v -> {

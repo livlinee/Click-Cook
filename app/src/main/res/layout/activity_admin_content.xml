@@ -40,7 +40,6 @@
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="1"
-            android:layout_marginEnd="8dp"
             app:cardCornerRadius="50dp"
             app:cardElevation="2dp">
 
@@ -57,13 +56,6 @@
                 android:textSize="16sp"/>
         </com.google.android.material.card.MaterialCardView>
 
-        <Spinner
-            android:id="@+id/spSort"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:background="@drawable/bg_spinner_outline"
-            android:paddingHorizontal="12dp"
-            android:spinnerMode="dropdown" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

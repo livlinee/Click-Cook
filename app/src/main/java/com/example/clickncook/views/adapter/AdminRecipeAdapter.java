@@ -1,6 +1,7 @@
 package com.example.clickncook.views.adapter;
 
 import android.content.Context;
+import android.text.format.DateUtils; // Import ini penting
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,16 +42,28 @@ public class AdminRecipeAdapter extends RecyclerView.Adapter<AdminRecipeAdapter.
         Recipe recipe = recipeList.get(position);
 
         holder.tvTitle.setText(recipe.getTitle());
-        holder.tvAuthor.setText("Oleh: " + recipe.getUserName());
 
-        holder.tvDate.setText("Diposting: Baru saja");
+        String authorName = recipe.getUserName() != null ? recipe.getUserName() : "Anonim";
+        holder.tvAuthor.setText("Oleh: " + authorName);
 
-        if (recipe.getImageUrl() != null) {
+        if (recipe.getCreatedAt() != null) {
+            long now = System.currentTimeMillis();
+            long time = recipe.getCreatedAt().getTime();
+            CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
+            holder.tvDate.setText("Diposting: " + timeAgo);
+        } else {
+            holder.tvDate.setText("Diposting: Tanggal tidak tersedia");
+        }
+        // -------------------------
+
+        if (recipe.getImageUrl() != null && !recipe.getImageUrl().isEmpty()) {
             Glide.with(context)
                     .load(recipe.getImageUrl())
                     .centerCrop()
                     .placeholder(R.drawable.logo)
                     .into(holder.imgThumb);
+        } else {
+            holder.imgThumb.setImageResource(R.drawable.logo);
         }
 
         holder.btnDelete.setOnClickListener(v -> listener.onDeleteClick(recipe));

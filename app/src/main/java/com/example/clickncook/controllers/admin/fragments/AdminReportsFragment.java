@@ -1,12 +1,15 @@
 package com.example.clickncook.controllers.admin.fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,6 +31,9 @@ public class AdminReportsFragment extends Fragment {
     private List<Report> reportList;
     private String currentStatus = "Pending";
 
+    private TextView tvPending, tvResolved;
+    private View indicatorPending, indicatorResolved;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -37,6 +43,12 @@ public class AdminReportsFragment extends Fragment {
         if (staticNav != null) staticNav.setVisibility(View.GONE);
 
         db = FirebaseFirestore.getInstance();
+
+        tvPending = view.findViewById(R.id.tvPending);
+        tvResolved = view.findViewById(R.id.tvResolved);
+        indicatorPending = view.findViewById(R.id.indicatorPending);
+        indicatorResolved = view.findViewById(R.id.indicatorResolved);
+
         RecyclerView recyclerView = view.findViewById(R.id.rvReports);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -45,7 +57,7 @@ public class AdminReportsFragment extends Fragment {
             @Override
             public void onClick(Report report) {
                 if ("recipe".equals(report.getContentType())) {
-                    Toast.makeText(getContext(), "ID Konten: " + report.getReportedContentId(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Cek Resep ID: " + report.getReportedContentId(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -57,22 +69,61 @@ public class AdminReportsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         view.findViewById(R.id.tabPending).setOnClickListener(v -> {
+            updateTabUI(true);
             currentStatus = "Pending";
             loadReports();
         });
 
         view.findViewById(R.id.tabResolved).setOnClickListener(v -> {
+            updateTabUI(false);
             currentStatus = "Resolved";
-            loadReports();
+            loadResolvedReports();
         });
 
         loadReports();
         return view;
     }
 
+    private void updateTabUI(boolean isPendingActive) {
+        int orange = ContextCompat.getColor(getContext(), R.color.primary_orange);
+        int gray = ContextCompat.getColor(getContext(), R.color.gray_text);
+        int grayStroke = ContextCompat.getColor(getContext(), R.color.gray_stroke);
+
+        if (isPendingActive) {
+            tvPending.setTextColor(orange);
+            indicatorPending.setBackgroundColor(orange);
+
+            tvResolved.setTextColor(gray);
+            indicatorResolved.setBackgroundColor(grayStroke);
+        } else {
+            tvPending.setTextColor(gray);
+            indicatorPending.setBackgroundColor(grayStroke);
+
+            tvResolved.setTextColor(orange);
+            indicatorResolved.setBackgroundColor(orange);
+        }
+    }
+
     private void loadReports() {
         db.collection("reports")
-                .whereEqualTo("status", currentStatus)
+                .whereEqualTo("status", "Pending")
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    reportList.clear();
+                    for (DocumentSnapshot doc : snapshots) {
+                        Report r = doc.toObject(Report.class);
+                        if (r != null) {
+                            r.setId(doc.getId());
+                            reportList.add(r);
+                        }
+                    }
+                    adapter.notifyDataSetChanged();
+                });
+    }
+
+    private void loadResolvedReports() {
+        db.collection("reports")
+                .whereNotEqualTo("status", "Pending")
                 .get()
                 .addOnSuccessListener(snapshots -> {
                     reportList.clear();
@@ -117,7 +168,8 @@ public class AdminReportsFragment extends Fragment {
 
         batch.commit().addOnSuccessListener(aVoid -> {
             Toast.makeText(getContext(), "Laporan Diproses", Toast.LENGTH_SHORT).show();
-            loadReports();
+            if(currentStatus.equals("Pending")) loadReports();
+            else loadResolvedReports();
         });
     }
 }

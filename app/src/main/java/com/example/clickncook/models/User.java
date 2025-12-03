@@ -1,6 +1,7 @@
 package com.example.clickncook.models;
 
 import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.PropertyName;
 import com.google.firebase.firestore.ServerTimestamp;
 import java.io.Serializable;
 import java.util.Date;
@@ -12,6 +13,7 @@ public class User implements Serializable {
     private String bio;
     private String photoUrl;
     private String role;
+    @PropertyName("isBlocked")
     private boolean isBlocked;
     private int totalRecipes;
     @ServerTimestamp private Date createdAt;
@@ -47,7 +49,9 @@ public class User implements Serializable {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
+    @PropertyName("isBlocked")
     public boolean isBlocked() { return isBlocked; }
+    @PropertyName("isBlocked")
     public void setBlocked(boolean blocked) { isBlocked = blocked; }
 
     public int getTotalRecipes() { return totalRecipes; }

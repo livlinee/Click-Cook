@@ -34,9 +34,11 @@ public class AdminContentFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_admin_content, container, false);
 
+        View staticNav = view.findViewById(R.id.adminBottomNavContainer);
+        if (staticNav != null) staticNav.setVisibility(View.GONE);
+
         db = FirebaseFirestore.getInstance();
         RecyclerView recyclerView = view.findViewById(R.id.rvContentList);
-
         EditText etSearch = view.findViewById(R.id.etSearchContent);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -71,16 +73,24 @@ public class AdminContentFragment extends Fragment {
     private void loadContent() {
         db.collection("recipes")
                 .orderBy("createdAt", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(snapshots -> {
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) {
+                        if (getContext() != null)
+                            Toast.makeText(getContext(), "Gagal memuat data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     allRecipes.clear();
                     recipeList.clear();
-                    for (DocumentSnapshot doc : snapshots) {
-                        Recipe r = doc.toObject(Recipe.class);
-                        if (r != null) {
-                            r.setId(doc.getId());
-                            allRecipes.add(r);
-                            recipeList.add(r);
+
+                    if (snapshots != null) {
+                        for (DocumentSnapshot doc : snapshots) {
+                            Recipe r = doc.toObject(Recipe.class);
+                            if (r != null) {
+                                r.setId(doc.getId());
+                                allRecipes.add(r);
+                                recipeList.add(r);
+                            }
                         }
                     }
                     adapter.notifyDataSetChanged();
@@ -95,7 +105,7 @@ public class AdminContentFragment extends Fragment {
             text = text.toLowerCase();
             for (Recipe item : allRecipes) {
                 if (item.getTitle().toLowerCase().contains(text) ||
-                        item.getUserName().toLowerCase().contains(text)) {
+                        (item.getUserName() != null && item.getUserName().toLowerCase().contains(text))) {
                     recipeList.add(item);
                 }
             }
@@ -107,9 +117,6 @@ public class AdminContentFragment extends Fragment {
         db.collection("recipes").document(recipe.getId()).delete()
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(), "Resep berhasil dihapus", Toast.LENGTH_SHORT).show();
-                    recipeList.remove(recipe);
-                    allRecipes.remove(recipe);
-                    adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Gagal menghapus: " + e.getMessage(), Toast.LENGTH_SHORT).show()

@@ -4,15 +4,18 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.example.clickncook.R;
+import com.google.firebase.firestore.AggregateSource;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class AdminHomeFragment extends Fragment {
+
+    private FirebaseFirestore db;
+    private TextView tvTotalUsers, tvTotalRecipes, tvTotalReports;
 
     @Nullable
     @Override
@@ -22,9 +25,49 @@ public class AdminHomeFragment extends Fragment {
         View staticNav = view.findViewById(R.id.adminBottomNavContainer);
         if (staticNav != null) staticNav.setVisibility(View.GONE);
 
-        RecyclerView rvActivity = view.findViewById(R.id.rvActivityLog);
-        rvActivity.setLayoutManager(new LinearLayoutManager(getContext()));
+        db = FirebaseFirestore.getInstance();
+
+        tvTotalUsers = view.findViewById(R.id.tvTotalUsers);
+        tvTotalRecipes = view.findViewById(R.id.tvTotalRecipes);
+        tvTotalReports = view.findViewById(R.id.tvTotalReports);
+
+        loadDashboardData();
 
         return view;
+    }
+
+    private void loadDashboardData() {
+        db.collection("users").count()
+                .get(AggregateSource.SERVER)
+                .addOnSuccessListener(snapshot -> {
+                    if (tvTotalUsers != null) {
+                        tvTotalUsers.setText(String.valueOf(snapshot.getCount()));
+                    }
+                });
+
+        db.collection("recipes")
+                .whereEqualTo("isDraft", false)
+                .count()
+                .get(AggregateSource.SERVER)
+                .addOnSuccessListener(snapshot -> {
+                    if (tvTotalRecipes != null) {
+                        tvTotalRecipes.setText(String.valueOf(snapshot.getCount()));
+                    }
+                });
+
+        db.collection("reports")
+                .whereEqualTo("status", "Pending")
+                .count()
+                .get(AggregateSource.SERVER)
+                .addOnSuccessListener(snapshot -> {
+                    long count = snapshot.getCount();
+                    if (tvTotalReports != null) {
+                        if (count > 0) {
+                            tvTotalReports.setText(count + " Laporan Perlu Ditinjau");
+                        } else {
+                            tvTotalReports.setText("Tidak ada laporan baru");
+                        }
+                    }
+                });
     }
 }

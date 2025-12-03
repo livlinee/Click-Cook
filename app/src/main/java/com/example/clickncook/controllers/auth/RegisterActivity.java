@@ -56,6 +56,11 @@ public class RegisterActivity extends AppCompatActivity {
         etEmail.addTextChangedListener(registerWatcher);
         etPassword.addTextChangedListener(registerWatcher);
 
+        findViewById(R.id.tvLoginLink).setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        });
+
         cbTerms.setOnCheckedChangeListener((buttonView, isChecked) -> checkInputs());
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());

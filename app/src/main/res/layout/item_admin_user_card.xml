@@ -22,7 +22,6 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:src="@drawable/ic_person_placeholder"
-            app:tint="@color/gray_text"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
