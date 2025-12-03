@@ -220,7 +220,7 @@ Project ini dibuat untuk keperluan akademis dan pembelajaran.
 ## 👥 Tim Pengembang
 
 **Click n Cook Team**
-- Project Manager : Lila Vimala_F52123027
+- Project Manager : Lila Vimala_F52123001
 - Firebase Specialist : Astiawati Manda_F52123007
 - UI/UX Frontend : Nur Istiqama_F52123005
 - MVC + Tester : Aditya Zaldy_F52123027
