@@ -1,0 +1,159 @@
+package com.example.clickncook.controllers.auth;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import com.example.clickncook.R;
+import com.example.clickncook.controllers.admin.AdminMainActivity;
+import com.example.clickncook.controllers.user.MainActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+public class LoginActivity extends AppCompatActivity {
+
+    private EditText etEmail, etPassword;
+    private Button btnLogin;
+    private TextView tvRegister, tvForgotPassword;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        etEmail = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
+        btnLogin = findViewById(R.id.btnLogin);
+        tvRegister = findViewById(R.id.tvRegisterLink);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
+
+        TextWatcher loginWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String email = etEmail.getText().toString().trim();
+                String password = etPassword.getText().toString().trim();
+                btnLogin.setEnabled(!email.isEmpty() && !password.isEmpty());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+
+        etEmail.addTextChangedListener(loginWatcher);
+        etPassword.addTextChangedListener(loginWatcher);
+
+        btnLogin.setOnClickListener(v -> performLogin());
+
+        tvRegister.setOnClickListener(v -> {
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+        });
+
+        tvForgotPassword.setOnClickListener(v -> {
+            startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
+        });
+    }
+
+    private void performLogin() {
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
+
+        if (TextUtils.isEmpty(email)) {
+            etEmail.setError("Email wajib diisi");
+            return;
+        }
+        if (TextUtils.isEmpty(password)) {
+            etPassword.setError("Password wajib diisi");
+            return;
+        }
+
+        btnLogin.setEnabled(false);
+        btnLogin.setText("Memuat...");
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            if (user.isEmailVerified()) {
+                                checkUserRoleAndStatus(user.getUid());
+                            } else {
+                                mAuth.signOut();
+                                btnLogin.setEnabled(true);
+                                btnLogin.setText("Login");
+                                showVerificationDialog(user);
+                            }
+                        }
+                    } else {
+                        btnLogin.setEnabled(true);
+                        btnLogin.setText("Login");
+                        Toast.makeText(LoginActivity.this, "Login Gagal: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void checkUserRoleAndStatus(String userId) {
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(document -> {
+                    btnLogin.setEnabled(true);
+                    btnLogin.setText("Login");
+                    if (document.exists()) {
+                        Boolean isBlocked = document.getBoolean("isBlocked");
+                        if (isBlocked != null && isBlocked) {
+                            mAuth.signOut();
+                            Toast.makeText(this, "Akun Anda diblokir Admin.", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        String role = document.getString("role");
+                        if ("admin".equals(role)) {
+                            Intent intent = new Intent(LoginActivity.this, AdminMainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                        } else {
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                        }
+                        finish();
+                    } else {
+                        mAuth.signOut();
+                        Toast.makeText(this, "Data profil tidak ditemukan.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    btnLogin.setEnabled(true);
+                    btnLogin.setText("Login");
+                    mAuth.signOut();
+                    Toast.makeText(this, "Gagal koneksi database.", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void showVerificationDialog(FirebaseUser user) {
+        new AlertDialog.Builder(this)
+                .setTitle("Verifikasi Email Diperlukan")
+                .setMessage("Email " + etEmail.getText().toString() + " belum diverifikasi. Silakan cek inbox/spam Anda.")
+                .setPositiveButton("Kirim Ulang Email", (dialog, which) -> {
+                    user.sendEmailVerification()
+                            .addOnSuccessListener(aVoid -> Toast.makeText(this, "Email terkirim!", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Toast.makeText(this, "Gagal kirim ulang.", Toast.LENGTH_SHORT).show());
+                })
+                .setNegativeButton("Tutup", null)
+                .show();
+    }
+}

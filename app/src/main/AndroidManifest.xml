@@ -9,20 +9,38 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:icon="@drawable/logo"
+        android:label="Click n Cook"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ClicknCook">
+        android:theme="@style/Theme.ClicknCook"
+        tools:targetApi="31">
+
         <activity
-            android:name=".MainActivity"
+            android:name=".controllers.auth.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".controllers.auth.LoginActivity" />
+        <activity android:name=".controllers.auth.RegisterActivity" />
+        <activity android:name=".controllers.auth.ForgotPasswordActivity" />
+        <activity android:name=".controllers.auth.VerificationActivity" />
+        <activity android:name=".controllers.auth.ResetPasswordActivity" />
+
+        <activity android:name=".controllers.user.MainActivity" />
+        <activity android:name=".controllers.user.DetailRecipeActivity" />
+        <activity android:name=".controllers.user.AddRecipeActivity" />
+        <activity android:name=".controllers.user.WriteReviewActivity" />
+        <activity android:name=".controllers.user.SettingsActivity" />
+
+        <activity android:name=".controllers.user.RecipeListActivity" />
+
+        <activity android:name=".controllers.admin.AdminMainActivity" />
+
     </application>
 
 </manifest>

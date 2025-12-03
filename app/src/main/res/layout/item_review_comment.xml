@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="12dp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imgUserAvatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_person_placeholder"
+        app:tint="#BDBDBD"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
+
+    <TextView
+        android:id="@+id/tvUserName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:text="Budi Santoso"
+        android:textColor="@color/black_text"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/imgUserAvatar"
+        app:layout_constraintTop_toTopOf="@+id/imgUserAvatar"
+        app:layout_constraintEnd_toStartOf="@+id/tvTime" />
+
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-2 hari lalu"
+        android:textColor="@color/gray_text"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/imgUserAvatar" />
+
+    <RatingBar
+        android:id="@+id/rbReviewStars"
+        style="?android:attr/ratingBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="2dp"
+        android:numStars="5"
+        android:rating="4"
+        android:isIndicator="true"
+        android:progressTint="@color/secondary_gold"
+        app:layout_constraintStart_toEndOf="@+id/imgUserAvatar"
+        app:layout_constraintTop_toBottomOf="@+id/tvUserName" />
+
+    <TextView
+        android:id="@+id/tvCommentContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:text="Enak banget! Tapi tadi saya modifikasi sedikit, cabainya saya kurangi biar nggak terlalu pedas buat anak-anak. Tetap lezat!"
+        android:textColor="@color/black_text"
+        android:textSize="14sp"
+        app:layout_constraintStart_toEndOf="@+id/imgUserAvatar"
+        app:layout_constraintTop_toBottomOf="@+id/rbReviewStars"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/gray_stroke"
+        app:layout_constraintTop_toBottomOf="@+id/tvCommentContent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
