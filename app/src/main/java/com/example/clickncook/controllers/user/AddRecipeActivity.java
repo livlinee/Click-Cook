@@ -138,6 +138,8 @@ public class AddRecipeActivity extends AppCompatActivity {
             return;
         }
 
+        setLoading(true);
+
         if (imageUri != null) {
             String filename = UUID.randomUUID().toString();
             StorageReference ref = storageRef.child("recipe_images/" + filename);

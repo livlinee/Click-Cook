@@ -12,6 +12,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
@@ -232,10 +233,10 @@ public class DetailRecipeActivity extends AppCompatActivity {
                     if (!snapshots.isEmpty()) {
                         isFavorited = true;
                         bookmarkId = snapshots.getDocuments().get(0).getId();
-                        btnFavorite.setImageResource(R.drawable.ic_heart_filled);
+                        setFavoriteIcon(true);
                     } else {
                         isFavorited = false;
-                        btnFavorite.setImageResource(R.drawable.ic_heart_outline);
+                        setFavoriteIcon(false);
                     }
                 });
     }
@@ -250,7 +251,7 @@ public class DetailRecipeActivity extends AppCompatActivity {
                 db.collection("bookmarks").document(bookmarkId).delete()
                         .addOnSuccessListener(aVoid -> {
                             isFavorited = false;
-                            btnFavorite.setImageResource(R.drawable.ic_heart_outline);
+                            setFavoriteIcon(false);
                             Toast.makeText(this, "Dihapus dari Favorit", Toast.LENGTH_SHORT).show();
                         });
             }
@@ -260,9 +261,19 @@ public class DetailRecipeActivity extends AppCompatActivity {
                     .addOnSuccessListener(docRef -> {
                         isFavorited = true;
                         bookmarkId = docRef.getId();
-                        btnFavorite.setImageResource(R.drawable.ic_heart_filled);
+                        setFavoriteIcon(true);
                         Toast.makeText(this, "Ditambahkan ke Favorit", Toast.LENGTH_SHORT).show();
                     });
+        }
+    }
+
+    private void setFavoriteIcon(boolean isActive) {
+        if (isActive) {
+            btnFavorite.setImageResource(R.drawable.ic_heart_filled);
+            btnFavorite.setColorFilter(ContextCompat.getColor(this, R.color.primary_orange));
+        } else {
+            btnFavorite.setImageResource(R.drawable.ic_heart_outline);
+            btnFavorite.clearColorFilter();
         }
     }
 

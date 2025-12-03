@@ -247,7 +247,6 @@
             android:layout_margin="16dp"
             android:src="@drawable/ic_heart_outline"
             app:backgroundTint="@color/white"
-            app:tint="@color/primary_orange"
             app:elevation="6dp"
             app:layout_anchor="@id/appbar"
             app:layout_anchorGravity="bottom|end"/>
